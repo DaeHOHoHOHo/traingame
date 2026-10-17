@@ -1,65 +1,19 @@
 <!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#090f1e">
-<meta name="description" content="중앙 타워 하나를 지키는 5분 로그라이트. 자동 공격, 무작위 강화, 거대한 연쇄 폭발.">
-<title>LAST TOWER — 타워 하나만 지켜라</title>
-<link rel="stylesheet" href="./style.css">
-</head>
-<body>
-<div id="app">
-<header class="topbar">
-  <div class="brand"><div class="brandmark">◆</div><div class="brandtext"><b>LAST<span>TOWER</span></b><small>THE LAST LINE OF DEFENSE</small></div></div>
-  <div class="top-stats">
-    <div class="top-stat"><small>웨이브</small><strong id="waveHud">01 <span>/ 12</span></strong></div>
-    <div class="top-stat"><small>처치</small><strong id="killHud">0</strong></div>
-    <div class="top-stat"><small>점수</small><strong id="scoreHud">0</strong></div>
-  </div>
-  <div class="top-actions"><button class="icon-button" id="soundBtn" type="button" title="소리 켜기 / 끄기">♪<span class="slash">/</span></button><button class="icon-button" id="pauseBtn" type="button" title="일시정지 (P)">Ⅱ</button></div>
-</header>
-<main class="layout">
- <section class="arena-panel" aria-label="게임 화면">
-  <canvas id="game" aria-label="자동 공격하는 타워와 몰려오는 적들"></canvas>
-  <div class="arena-top">
-   <div class="wave-box"><div class="wave-caption"><span id="waveLabel">웨이브 1 · 황무지</span><span id="waveTime">00:00</span></div><div class="progress-track"><div id="waveProgress" class="progress-fill"></div></div></div>
-   <div class="game-phase" id="phaseChip">준비 중</div>
-  </div>
-  <div class="combo-display" id="comboView" hidden>연쇄 처치 <strong id="comboN">x2</strong></div>
-  <div class="float-announcement" id="announcement" aria-live="polite"></div>
-  <div class="arena-bottom">
-   <div class="hp-panel"><div class="hp-heading"><span>◆ 중앙 코어</span><b id="hpNum">180 / 180</b></div><div class="hp-track"><div class="hp-fill" id="hpBar"></div></div></div>
-   <button type="button" class="pulse-button" id="pulseBtn"><span class="pulse-icon">✦</span><span class="pulse-txt"><b>충격파</b><small id="pulseTime">SPACE / 준비 완료</small></span><span class="pulse-ring" id="pulseRing"></span></button>
-  </div>
-  <div class="screen-tint" id="screenTint"></div>
-  <div class="overlay" id="overlay">
-   <div id="overlayContent" class="modal start-modal"></div>
-  </div>
- </section>
- <aside class="sidebar" aria-label="게임 상태 및 강화 능력">
-  <div class="side-head"><span class="eyebrow">COMMAND CENTER</span><h2>방어 현황</h2><p>자동으로 공격하는 타워를 진화시키세요.</p></div>
-  <div class="side-scroll">
-   <div class="stat-grid">
-    <div class="stat-cell"><span>공격력</span><strong id="statDmg">16</strong></div>
-    <div class="stat-cell"><span>초당 발사</span><strong id="statSpeed">1.9</strong></div>
-    <div class="stat-cell"><span>멀티샷</span><strong id="statShots">1발</strong></div>
-    <div class="stat-cell"><span>치명타</span><strong id="statCrit">5%</strong></div>
-   </div>
-   <div class="section-heading"><h3>현재 빌드</h3><span id="buildCount">0 / 11</span></div>
-   <div id="buildList" class="build-list"><div class="empty-build"><span>✧</span> 웨이브를 클리어하면<br>강력한 능력이 쌓입니다.</div></div>
-   <div class="section-heading"><h3>웨이브 목표</h3><span>3단계 보스</span></div>
-   <div class="milestones">
-    <div class="milestone" id="boss4"><span class="milestone-dot"></span><span>4 웨이브</span><strong>철갑 거인</strong></div>
-    <div class="milestone" id="boss8"><span class="milestone-dot"></span><span>8 웨이브</span><strong>균열의 핵</strong></div>
-    <div class="milestone" id="boss12"><span class="milestone-dot"></span><span>12 웨이브</span><strong>최후의 침공</strong></div>
-   </div>
-  </div>
-  <div class="side-footer"><div><span>최고 기록</span><b id="bestScore">0</b></div><div><span>최고 웨이브</span><b id="bestWave">—</b></div></div>
- </aside>
-</main>
-<footer class="footer"><span class="live-dot"></span><span>방치형이 아닌 <b>자동 공격 로그라이트</b></span><span class="footer-right">강화 선택: 클릭 · 충격파: SPACE · 일시정지: P</span></footer>
-</div>
-<script src="./game.js" defer></script>
-</body>
-</html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"><meta name="theme-color" content="#080b17"><meta name="description" content="타워 하나만 지켜라. 클릭 없이 자동으로 폭발하는 3분 로그라이트."><title>LAST TOWER · OVERDRIVE</title><link rel="stylesheet" href="./style.css"></head>
+<body><div id="app"><main class="battle" aria-label="타워 디펜스 게임">
+ <canvas id="game" aria-label="중앙 타워 자동 전투 화면"></canvas>
+ <div class="ui top-ui"><div class="logo"><span class="logo-mark">◆</span><div><b>LAST <i>TOWER</i></b><small>OVERDRIVE</small></div></div>
+ <div class="wave-box"><div class="wave-caption"><span id="waveLabel">WAVE 01</span><span id="waveTime">00:00</span></div><div class="progress-track"><div class="progress-fill" id="waveProgress"></div></div></div>
+ <div class="top-actions"><button id="soundBtn" class="icon-button" type="button" aria-label="소리 설정">♪<span class="slash">/</span></button><button id="pauseBtn" class="icon-button" type="button" aria-label="일시정지">Ⅱ</button></div></div>
+ <div class="ui left-ui"><div class="mini-label">방어 기록</div><div class="score-value" id="scoreHud">0</div><div class="tiny-metrics"><span>처치 <b id="killHud">0</b></span><span class="split">/</span><span>최대 <b id="bestScore">0</b></span></div></div>
+ <div class="ui right-ui"><div class="phase" id="phaseChip">대기 중</div><div class="round-indicator">STAGE <b id="waveHud">01 <span>/ 12</span></b></div></div>
+ <div id="comboView" class="combo-display" hidden><span>CHAIN KILL</span><strong id="comboN">×2</strong></div>
+ <div id="frenzyView" class="frenzy-display" hidden>OVERDRIVE <span id="frenzyTime">5.0s</span></div>
+ <div class="float-announcement" id="announcement" aria-live="polite"></div>
+ <div class="ui bottom-ui"><div class="core-strip"><div class="hp-top"><span>◆ CORE</span><strong id="hpNum">205 / 205</strong></div><div class="hp-track"><div class="hp-fill" id="hpBar"></div></div></div>
+ <div class="build-strip" id="buildList" aria-label="장착된 능력"><span class="empty-build">웨이브를 통과하면 능력이 여기에 쌓입니다</span></div>
+ <div class="heat-unit"><div class="heat-label"><span>자동 폭주</span><strong id="heatNumber">0%</strong></div><div class="heat-track"><div id="heatFill"></div></div></div></div>
+ <div class="screen-tint" id="screenTint"></div><div class="overlay" id="overlay"><div class="modal start-modal" id="overlayContent"></div></div>
+ <div class="screen-grain" aria-hidden="true"></div>
+ <div class="sr-only"><span id="statDmg"></span><span id="statSpeed"></span><span id="statShots"></span><span id="statCrit"></span><span id="buildCount"></span><span id="bestWave"></span><span id="boss4"></span><span id="boss8"></span><span id="boss12"></span></div>
+</main></div><script src="./game.js" defer></script></body></html>
