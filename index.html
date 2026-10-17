@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101a2d">
+  <meta name="description" content="달리면서 자원을 모으고, 객차를 이어 붙여 끝없이 성장하는 무료 브라우저 게임.">
+  <title>ENDLESS TRAIN — 끝없이 길어지는 기차</title>
+  <style>
+:root{color-scheme:dark;--bg:#0c1423;--surface:#141f31;--card:#19263a;--line:#293950;--muted:#91a3bc;--text:#f4f5f8;--gold:#ffd18a;--accent:#ffb66e;--green:#68d9aa}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Pretendard,"Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--text);background:radial-gradient(ellipse at 85% 0,#22334a 0,transparent 36%),var(--bg);min-width:320px}button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid #8ec5ff;outline-offset:3px}button:disabled{cursor:not-allowed;opacity:.45}button:not(:disabled){transition:transform .14s,filter .14s,border-color .14s}button:not(:disabled):active{transform:scale(.97)}.hidden{display:none!important}.grain{pointer-events:none;position:fixed;inset:0;z-index:20;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E")}.header{border-bottom:1px solid #2a3851;background:#0d1726d9;backdrop-filter:blur(10px)}.header-inner,.container{max-width:1470px;margin:auto;padding-left:30px;padding-right:30px}.header-inner{height:78px;display:flex;justify-content:space-between;align-items:center}.brand{display:flex;align-items:center;gap:12px}.brand-icon{background:#25334b;border:1px solid #344861;font-size:28px;width:46px;height:46px;display:grid;place-items:center;border-radius:13px}.brand-overline,.section-kicker,.eyebrow{font-size:10px;letter-spacing:2.7px;font-weight:800;color:#84a1bf}.brand-name{font-size:21px;font-weight:950;letter-spacing:1.4px;line-height:1.25}.brand-name span{color:#fbbb79}.header-actions{display:flex;align-items:center;gap:9px}.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid #2a493f;background:#153229;color:#a4e9bd;padding:9px 14px;border-radius:30px;font-size:12px;font-weight:700;margin-right:8px}.green-dot,.live-dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:#76e2ae;box-shadow:0 0 12px #62f4a4}.icon-btn{background:#192437;border:1px solid #33425b;color:#e6edf6;width:35px;height:35px;border-radius:10px;font-weight:900}.danger-icon:hover{color:#ff9898}.intro{padding:34px 0 26px;display:flex;align-items:center;justify-content:space-between}.eyebrow{color:#eab783;margin-bottom:10px}.intro h1{font-size:clamp(23px,2.9vw,34px);letter-spacing:-1.3px;margin:0 0 9px;font-weight:850}.intro h1 em{font-style:normal;color:#ffc684}.intro p{color:#9cacc3;font-size:13px;margin:0}.intro-badge{background:#18253a;padding:9px 13px;border:1px solid #30435a;border-radius:10px;text-align:center;color:#849bb7;font-size:10px;letter-spacing:1px;min-width:73px}.intro-badge strong{display:block;color:#f4d6b4;font-size:20px;letter-spacing:2px}.stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:16px}.stat{background:linear-gradient(150deg,#19273b,#141f31);border:1px solid #304059;border-radius:13px;padding:16px 18px;min-width:0;box-shadow:0 10px 25px #050b1622}.stat-name{color:#abb7ca;font-size:12px;font-weight:700;white-space:nowrap}.stat-icon{display:inline-grid;place-items:center;margin-right:5px;font-size:13px}.gold{color:#ffc871}.rusty{color:#ff9872}.blue{color:#78b8ff}.purple{color:#bd94ff}.mint{color:#70dfc1}.pink{color:#ffb4ca}.stat-value{font-size:clamp(17px,2.2vw,26px);font-weight:900;line-height:1.6;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}.stat-sub{color:#72d6aa;font-size:11px}.world-wrap{background:#172236;border:1px solid #34455c;box-shadow:0 15px 46px #0002;border-radius:16px;overflow:hidden}.world-top{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:linear-gradient(90deg,#1d2b40,#1b283d)}.region-label{display:flex;align-items:center;gap:9px}.region-icon{font-size:21px;color:#ffe0a0}.region-label div{display:flex;flex-direction:column;gap:3px}.small-heading{font-size:10px;color:#8e9fba}.region-label strong{font-size:14px}.top-right{display:flex;align-items:center;gap:13px;color:#abc0d4;font-size:12px}.top-divider{width:1px;height:15px;background:#52647c}.canvas-wrap{position:relative;overflow:hidden;background:#97b5cc}.canvas-wrap canvas{display:block;width:100%;height:auto;aspect-ratio:1200/460;cursor:crosshair}.canvas-left,.canvas-right{position:absolute;top:15px;border-radius:6px;background:#0d1c2ab8;color:#eaf0fa;font-size:10px;letter-spacing:1px;padding:8px 10px;backdrop-filter:blur(4px)}.canvas-left{left:17px;display:flex;align-items:center;gap:7px}.canvas-right{right:17px}.world-bottom{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:13px 17px}.distance-progress{flex:1;display:flex;align-items:center;gap:12px;min-width:0}.distance-progress span{font-size:11px;color:#9fb0c5;white-space:nowrap}.distance-progress strong{min-width:60px;text-align:right;font-size:12px;color:#ffe3b5}.progress-track{background:#2c3b51;height:7px;border-radius:10px;overflow:hidden;flex:1}.progress-fill,.mission-progress div{height:100%;width:0%;background:linear-gradient(90deg,#ff9e65,#ffcf88);border-radius:10px;transition:width .25s}.journey-controls{display:flex;gap:9px}.small-btn{border:1px solid #40536a;background:#26374c;color:#e1e9f4;border-radius:8px;padding:11px 13px;font-size:11px;font-weight:800}.boost-btn{background:#f3b46c;color:#24283b;border:0;border-radius:8px;padding:10px 14px;font-size:12px;font-weight:900;white-space:nowrap}.boost-btn span{font-size:10px;opacity:.67;margin-left:7px}.dashboard{display:grid;grid-template-columns:minmax(245px,305px) minmax(0,1fr);gap:16px;margin-top:18px}.left-column,.right-column{display:flex;flex-direction:column;gap:15px}.panel{border:1px solid #304059;background:linear-gradient(145deg,#19263a,#152033);border-radius:14px;padding:21px}.panel-heading{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}.panel-heading h2{font-size:18px;margin:7px 0 0;letter-spacing:-.5px}.section-symbol{font-size:22px;color:#8fa8c6}.engine-level{display:flex;justify-content:space-between;align-items:center;padding:16px;background:#213148;border-radius:10px;border:1px solid #354760}.engine-level span{color:#abb9cc;font-size:12px}.engine-level strong{font-size:25px;color:#ffe1b5}.engine-level strong span{color:inherit;font-size:inherit}.engine-stats{margin:18px 0}.engine-stats>div{display:flex;justify-content:space-between;gap:10px;margin:13px 0;font-size:12px}.engine-stats span{color:#94a6bf}.engine-stats strong{color:#e9f0fc}.primary-btn{border:1px solid #ffdaa6;background:linear-gradient(135deg,#f6c580,#ee9b65);color:#2b2a2c;padding:13px 14px;border-radius:9px;font-weight:900}.full{width:100%;display:flex;justify-content:space-between}.button-price{background:#ffffff55;padding:3px 7px;border-radius:5px;font-size:11px}.hint{color:#869bb7;font-size:11px;line-height:1.7;margin:10px 0 0}.mission-name{font-size:15px;font-weight:800;margin-top:10px}.mission-detail{font-size:12px;color:#99aec6;margin:8px 0 17px;line-height:1.65}.mission-progress{background:#314159;border-radius:10px;height:9px;overflow:hidden}.mission-meta{display:flex;justify-content:space-between;gap:8px;margin-top:10px;font-size:11px;color:#94a7c3}.mission-meta strong{color:#ffd09a}.status-line{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2f4056;padding:12px 0;font-size:12px;color:#b5c3d5}.status-line strong{color:#e4eef9;font-size:11px}.status-light{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px}.status-light.green{background:#72dbad}.status-light.orange{background:#f7b36e}.status-light.blue{background:#79b9ff}.control-footer{font-size:11px;color:#8297b1;line-height:1.9;margin-top:13px}.shop-header{align-items:flex-end;gap:10px}.shop-header p{font-size:12px;color:#95a9c1;margin:10px 0 0;line-height:1.5}.tab-list{display:flex;background:#111c2b;padding:4px;border-radius:8px;border:1px solid #2e4058;white-space:nowrap}.tab{border:0;background:transparent;color:#a8bad1;border-radius:6px;font-size:12px;font-weight:800;padding:9px 13px}.tab.active{background:#314259;color:#fff}.shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.wagon-card{background:linear-gradient(145deg,#223249,#1a293e);border:1px solid #384c62;border-radius:11px;padding:15px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:9px}.wagon-card.locked{opacity:.64}.wagon-card-top{display:flex;align-items:center;gap:10px}.wagon-symbol{height:41px;width:43px;border-radius:9px;display:grid;place-items:center;font-size:22px;flex-shrink:0;border:1px solid #ffffff1d}.wagon-title{font-size:14px;font-weight:850}.wagon-role{font-size:10px;color:#94aaca;margin-top:4px}.wagon-desc{font-size:11px;color:#aabbce;line-height:1.6;min-height:35px}.wagon-effect{font-size:11px;color:#77dcb4;font-weight:800}.wagon-bottom{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:auto}.cost-group{display:flex;flex-direction:column;gap:5px;color:#cbdaec;font-size:10px}.buy-btn{border:1px solid #7498be;background:#395c7f;color:#fff;border-radius:8px;padding:11px 15px;font-size:12px;font-weight:900;white-space:nowrap}.buy-btn:not(:disabled):hover{filter:brightness(1.15)}.lock-tag{font-size:11px;color:#ffca92;background:#3b3040;padding:8px;border-radius:7px}.manage-info{padding:12px 13px;border:1px solid #3c5268;background:#24354d;font-size:11px;line-height:1.8;color:#adc0d2;border-radius:8px;margin-bottom:12px}.manage-info b{color:#ffe0b4}.wagon-list{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:18px}.wagon-chip{background:#213149;border:1px solid #3c536d;padding:10px;border-radius:10px;display:flex;align-items:center;gap:8px;color:#f2f4f7;text-align:left}.wagon-chip.active{border-color:#ffbf72;background:#3c3940;box-shadow:0 0 0 1px #ffbf7240}.wagon-chip-icon{font-size:19px}.wagon-chip span{font-size:11px;font-weight:800;white-space:nowrap}.wagon-chip small{display:block;font-size:10px;color:#9fb1ca;font-weight:500;margin-top:3px}.wagon-detail{border:1px solid #38506b;padding:16px;border-radius:11px;background:#1d2d42}.wagon-detail-head{display:flex;align-items:center;gap:10px}.wagon-detail h3{font-size:15px;margin:0 0 5px}.wagon-detail p{font-size:12px;color:#9eafc5;margin:0}.detail-bonus{background:#263a4e;color:#9fe5c4;font-size:11px;padding:10px;margin:13px 0;border-radius:7px;line-height:1.7}.detail-buttons{display:flex;flex-wrap:wrap;gap:7px}.detail-buttons button{background:#32445b;color:#e9f4fa;border:1px solid #4c6580;border-radius:8px;padding:10px 12px;font-size:11px;font-weight:800}.detail-buttons button.upgrade{background:#e5a86b;color:#231f1e;border:1px solid #ffd3a4}.tips-panel{display:flex;gap:12px;align-items:flex-start;border:1px solid #57614b;background:linear-gradient(90deg,#263a38,#283543);padding:19px;border-radius:12px}.tips-symbol{font-size:23px;color:#e8d08a}.tips-panel strong{font-size:13px;color:#ffe0ab}.tips-panel p{margin:7px 0 0;color:#b4c7c7;font-size:11px;line-height:1.8}.footer{padding:25px 0 35px;display:flex;justify-content:space-between;color:#7185a2;font-size:10px;letter-spacing:.7px}.overlay{position:fixed;inset:0;background:#050c17d9;display:flex;justify-content:center;align-items:center;z-index:30;padding:20px;backdrop-filter:blur(8px)}.modal{width:min(620px,100%);border:1px solid #50627e;border-radius:20px;background:linear-gradient(145deg,#24364b,#152238);padding:33px;box-shadow:0 25px 90px #000b;position:relative}.modal-kicker{color:#f8ba75;font-size:11px;letter-spacing:2px;font-weight:900}.modal h2{font-size:27px;letter-spacing:-.9px;margin:13px 0}.modal p{font-size:13px;color:#b5c6da;line-height:1.85;margin-bottom:20px}.modal-close{position:absolute;right:18px;top:15px;color:#becadb;background:transparent;border:0;font-size:26px}.modal-choices{display:flex;flex-direction:column;gap:9px}.reward-option{padding:16px;text-align:left;background:#253c53;border:1px solid #46617d;border-radius:11px;color:#e9f5ff;display:flex;gap:15px;align-items:center}.reward-option:hover{border-color:#f9c484;filter:brightness(1.15)}.reward-emoji{font-size:29px}.reward-title{font-size:14px;font-weight:850}.reward-desc{font-size:12px;color:#aec0d6;margin-top:4px}#toastContainer{position:absolute;left:50%;top:42px;transform:translateX(-50%);width:75%;display:flex;align-items:center;flex-direction:column;pointer-events:none;gap:8px}.toast{background:#15283cdd;backdrop-filter:blur(7px);border:1px solid #eac184;color:#ffdfaa;padding:9px 17px;border-radius:20px;font-size:12px;font-weight:800;text-align:center;animation:toast-in .25s ease}@keyframes toast-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}@media(max-width:1100px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.dashboard{grid-template-columns:minmax(220px,280px) minmax(0,1fr)}.shop-grid{grid-template-columns:1fr}.wagon-desc{min-height:auto}}@media(max-width:750px){.header-inner,.container{padding-left:15px;padding-right:15px}.header-inner{height:69px}.brand-name{font-size:17px}.brand-overline{font-size:8px}.pill{display:none}.intro{padding:22px 0}.intro-badge{display:none}.stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.stat{padding:12px 10px;border-radius:9px}.stat-name{font-size:10px}.stat-value{font-size:18px}.stat-sub{font-size:9px}.world-top{padding:10px 12px}.top-right{font-size:10px}.canvas-wrap canvas{min-height:225px;object-fit:cover}.world-bottom{flex-direction:column;align-items:stretch;gap:13px}.journey-controls{justify-content:space-between}.journey-controls button{flex:1}.dashboard{grid-template-columns:1fr}.left-column{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}.left-column .control-panel{grid-column:1/-1}.panel{padding:16px}.shop-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.shop-header{flex-direction:column;align-items:stretch}.footer{gap:10px;flex-direction:column}.engine-panel,.mission-panel{height:100%}}@media(max-width:480px){.intro h1{font-size:24px}.intro p{font-size:11px}.left-column{grid-template-columns:1fr}.left-column .control-panel{grid-column:auto}.shop-grid{grid-template-columns:1fr}.canvas-left,.canvas-right{font-size:9px;padding:6px}.top-right #weatherLabel,.top-divider{display:none}.brand-icon{width:40px;height:40px;font-size:23px}.header-actions{gap:5px}.icon-btn{width:31px;height:32px}.stat-value{font-size:16px}.stat-name{font-size:9px}.stat-sub{font-size:9px}.modal{padding:24px 18px}.modal h2{font-size:23px}}
+
+</style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand"><div class="brand-icon">🚂</div><div><div class="brand-overline">INCREMENTAL RAILWAY</div><div class="brand-name">ENDLESS <span>TRAIN</span></div></div></div>
+      <div class="header-actions"><span class="pill"><span class="green-dot"></span> 무료 브라우저 게임</span><button id="audioBtn" class="icon-btn" title="효과음 켜기 / 끄기" aria-label="효과음 켜기 / 끄기">🔇</button><button id="helpBtn" class="icon-btn" title="도움말" aria-label="도움말">?</button><button id="resetBtn" class="icon-btn danger-icon" title="처음부터 시작" aria-label="저장 초기화">↺</button></div>
+    </div>
+  </header>
+  <div class="container">
+    <section class="intro"><div><div class="eyebrow">BUILD · CONNECT · MULTIPLY</div><h1>작은 기관차에서 <em>끝없는 제국</em>까지.</h1><p>자동으로 달리고, 자원을 모으고, 객차를 연결해 기차를 계속 성장시키세요.</p></div><div class="intro-badge"><span>RUN #</span><strong id="runNumber">001</strong></div></section>
+    <section class="stats" aria-label="현재 자원 현황">
+      <div class="stat"><div class="stat-name"><span class="stat-icon gold">●</span> 코인</div><div class="stat-value" id="coins">0</div><div class="stat-sub" id="coinRate">+0/초</div></div>
+      <div class="stat"><div class="stat-name"><span class="stat-icon rusty">◆</span> 고철</div><div class="stat-value" id="scrap">0</div><div class="stat-sub" id="scrapRate">+0/초</div></div>
+      <div class="stat"><div class="stat-name"><span class="stat-icon blue">⬡</span> 광석</div><div class="stat-value" id="ore">0</div><div class="stat-sub" id="oreRate">+0/초</div></div>
+      <div class="stat"><div class="stat-name"><span class="stat-icon purple">✦</span> 결정</div><div class="stat-value" id="crystal">0</div><div class="stat-sub" id="crystalRate">+0/초</div></div>
+      <div class="stat"><div class="stat-name"><span class="stat-icon mint">➜</span> 누적 거리</div><div class="stat-value" id="distance">0m</div><div class="stat-sub" id="speedText">속도 1.0×</div></div>
+      <div class="stat"><div class="stat-name"><span class="stat-icon pink">▣</span> 객차</div><div class="stat-value" id="wagonsCount">1칸</div><div class="stat-sub" id="trainLength">전체 길이 24m</div></div>
+    </section>
+    <section class="world-wrap">
+      <div class="world-top"><div class="region-label"><span class="region-icon" id="regionIcon">✿</span><div><span class="small-heading">현재 운행 지역</span><strong id="regionName">햇살 초원</strong></div></div><div class="top-right"><span id="weatherLabel">평온한 구간</span><span class="top-divider"></span><span id="nextStationText">다음 역 650m</span></div></div>
+      <div class="canvas-wrap"><canvas id="gameCanvas" width="1200" height="460" aria-label="달리는 기차와 연결된 객차를 보여주는 게임 화면. 객차를 클릭하여 선택할 수 있습니다."></canvas><div class="canvas-left"><span class="live-dot"></span> LIVE JOURNEY</div><div class="canvas-right" id="canvasTrainText">기관차 + 객차 1칸</div><div id="toastContainer" aria-live="polite"></div></div>
+      <div class="world-bottom"><div class="distance-progress"><span>다음 정거장</span><div class="progress-track"><div class="progress-fill" id="stationProgress"></div></div><strong id="stationMeters">650m</strong></div><div class="journey-controls"><button id="pauseBtn" class="small-btn">Ⅱ 일시정지</button><button id="boostBtn" class="boost-btn">⚡ 급행 운행 <span id="boostTimer">준비 완료</span></button></div></div>
+    </section>
+    <main class="dashboard">
+      <aside class="left-column">
+        <section class="panel engine-panel"><div class="panel-heading"><div><span class="section-kicker">LOCOMOTIVE</span><h2>기관차 제어실</h2></div><span class="section-symbol">⚙</span></div><div class="engine-level"><span>기관차 레벨</span><strong>Lv.<span id="engineLvl">1</span></strong></div><div class="engine-stats"><div><span>운행 속도</span><strong id="engineSpeed">1.0×</strong></div><div><span>전체 생산 보너스</span><strong id="engineBonus">+0%</strong></div><div><span>지금까지 번 코인</span><strong id="lifetimeCoins">0</strong></div></div><button id="engineBtn" class="primary-btn full"><span>기관차 강화</span><span class="button-price" id="engineCost">◉ 220</span></button><p class="hint">강화하면 이동 속도와 수집 효율이 높아집니다.</p></section>
+        <section class="panel mission-panel"><div class="panel-heading"><div><span class="section-kicker">NEXT MILESTONE</span><h2>다음 목표</h2></div><span class="section-symbol">◎</span></div><div class="mission-name" id="missionTitle">첫 객차 확장</div><p class="mission-detail" id="missionDesc">새로운 객차 1개를 연결하세요.</p><div class="mission-progress"><div id="missionBar"></div></div><div class="mission-meta"><span id="missionProgressText">0 / 1</span><strong id="missionReward">보상 코인 +160</strong></div></section>
+        <section class="panel control-panel"><div class="panel-heading"><div><span class="section-kicker">CONTROL CENTER</span><h2>자동화 상태</h2></div><span class="section-symbol">↗</span></div><div class="status-line"><span><i class="status-light green"></i> 자동 주행</span><strong id="autoMoveStatus">가동 중</strong></div><div class="status-line"><span><i class="status-light orange"></i> 자원 수집</span><strong>자동</strong></div><div class="status-line"><span><i class="status-light blue"></i> 저장</span><strong id="saveStatus">브라우저에 자동 저장</strong></div><div class="control-footer">인터넷 연결 없이도 게임을 열 수 있습니다.<br>진행 상황은 이 브라우저에만 저장됩니다.</div></section>
+      </aside>
+      <div class="right-column">
+        <section class="panel shop-panel"><div class="panel-heading shop-header"><div><span class="section-kicker">EXPAND YOUR EMPIRE</span><h2>객차 제작소</h2><p>객차를 연결할수록 생산 능력과 기차의 길이가 증가합니다.</p></div><div class="tab-list"><button class="tab active" id="shopTab" data-tab="shop">객차 구매</button><button class="tab" id="manageTab" data-tab="manage">편성 관리</button></div></div><div id="shopContent" class="shop-grid"></div><div id="manageContent" class="manage-content hidden"><div class="manage-info">객차를 선택해 강화하거나 순서를 바꿔 보세요. <b>발전칸과 증폭칸은 양옆 객차의 생산력을 높여 줍니다.</b></div><div id="wagonList" class="wagon-list"></div><div id="wagonDetail" class="wagon-detail"></div></div></section>
+        <section class="tips-panel"><div class="tips-symbol">✧</div><div><strong>성장의 비결</strong><p id="gameTip">수집칸이 고철을 모으고, 판매칸이 고철을 코인으로 바꿉니다. 두 객차를 조합해 보세요.</p></div></section>
+      </div>
+    </main>
+    <footer class="footer"><span>ENDLESS TRAIN · FREE WEB PROTOTYPE</span><span>광고 없음 · 로그인 없음 · 서버 없음</span></footer>
+  </div>
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true"><div class="modal"><button id="modalClose" class="modal-close" aria-label="닫기">×</button><div class="modal-kicker" id="modalKicker">STATION ARRIVAL</div><h2 id="modalTitle">정거장 도착</h2><p id="modalDescription"></p><div id="modalChoices" class="modal-choices"></div></div></div>
+  <script>
+/* ENDLESS TRAIN — fully client-side game. No libraries, server, or paid API required. */
+(() => {
+  'use strict';
+
+  const KEY = 'endless-train-save-v1';
+  const WORLD_W = 1200, WORLD_H = 460, STATION_STEP = 650;
+  const $ = id => document.getElementById(id);
+  const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+  const fmt = n => {
+    if (!Number.isFinite(n)) return '0';
+    if (Math.abs(n) < 1000) return Math.floor(n).toLocaleString('ko-KR');
+    if (Math.abs(n) < 1000000) return (n / 1000).toFixed(n < 10000 ? 1 : 0) + 'K';
+    if (Math.abs(n) < 1e9) return (n / 1e6).toFixed(2) + 'M';
+    if (Math.abs(n) < 1e12) return (n / 1e9).toFixed(2) + 'B';
+    if (Math.abs(n) < 1e15) return (n / 1e12).toFixed(2) + 'T';
+    return n.toExponential(2);
+  };
+  const money = n => `◉ ${fmt(n)}`;
+
+  const TYPES = [
+    {id:'collector',name:'자석 수집칸',icon:'🧲',role:'자원 수집',color:'#508ba8',coin:62,scrap:12,unlock:0,effect:'고철 자동 수집',desc:'선로 주변의 고철을 끌어모읍니다. 모든 성장의 기초.'},
+    {id:'market',name:'이동 판매칸',icon:'💰',role:'코인 생산',color:'#c89255',coin:85,scrap:17,unlock:0,effect:'고철 → 코인',desc:'고철을 가공해 역을 거치지 않고 판매합니다.'},
+    {id:'miner',name:'광석 채굴칸',icon:'⛏️',role:'자원 수집',color:'#6686b9',coin:210,scrap:36,unlock:250,effect:'광석 자동 수집',desc:'주행하면서 광맥을 탐지하고 희귀 광석을 획득합니다.'},
+    {id:'smelter',name:'용광로칸',icon:'🔥',role:'코인 생산',color:'#ba6a58',coin:330,scrap:55,unlock:500,effect:'광석 → 고수익 코인',desc:'수집한 광석을 녹여 값비싼 합금을 만듭니다.'},
+    {id:'dynamo',name:'발전 동력칸',icon:'⚡',role:'인접 시너지',color:'#c5a44e',coin:510,scrap:75,unlock:900,effect:'양옆 생산력 +25%',desc:'바로 옆에 연결한 객차들의 작업 속도를 높입니다.'},
+    {id:'booster',name:'공명 증폭칸',icon:'✴️',role:'인접 시너지',color:'#9a72c5',coin:710,scrap:105,unlock:1400,effect:'양옆 생산력 +55%',desc:'양쪽 객차의 효과를 증폭하는 고급 장비입니다.'},
+    {id:'lab',name:'결정 연구칸',icon:'🔮',role:'희귀 자원',color:'#5eb7b9',coin:980,scrap:155,unlock:1900,effect:'고철 + 광석 → 결정',desc:'일반 재료를 희귀 결정으로 변환합니다.'}
+  ];
+  const TYPE_MAP = Object.fromEntries(TYPES.map(t => [t.id,t]));
+  const REGIONS = [
+    {at:0,name:'햇살 초원',icon:'✿',weather:'고철 수집 +25%',scrap:1.25,ore:1,crystal:1,sky:['#9bd9dc','#dfebbe'],hill:['#9dcf9d','#6ea18a','#426f68'],ground:'#395d57'},
+    {at:620,name:'붉은 협곡',icon:'◈',weather:'광석 생산 +65%',scrap:1,ore:1.65,crystal:1,sky:['#edb27b','#ffdfaa'],hill:['#d99a75','#ad745f','#865a58'],ground:'#634d50'},
+    {at:1450,name:'유리 설원',icon:'❄',weather:'결정 발견 확률 상승',scrap:.92,ore:1.1,crystal:2.4,sky:['#8dafdb','#d1e9f2'],hill:['#c7e5e7','#a2c9d9','#779cac'],ground:'#5c8295'},
+    {at:2550,name:'황혼의 황무지',icon:'☾',weather:'판매 수익 +45%',scrap:1.1,ore:1.4,crystal:1.5,coin:1.45,sky:['#373e67','#bc7493'],hill:['#6a5981','#54466e','#373b5b'],ground:'#303651'},
+    {at:4200,name:'오로라 황야',icon:'✧',weather:'모든 생산 +25%',scrap:1.25,ore:1.25,crystal:1.25,coin:1.25,sky:['#263c63','#679d94'],hill:['#4b787e','#345769','#253d57'],ground:'#1e3449'}
+  ];
+  const MISSIONS = [
+    {title:'첫 객차 확장',desc:'제작소에서 객차를 1개 구매하세요.',goal:2,measure:s=>s.wagons.length,reward:{coins:160,scrap:36}},
+    {title:'첫 수익 800코인',desc:'누적 수익을 800코인까지 늘리세요.',goal:800,measure:s=>s.earned,reward:{coins:240,scrap:45}},
+    {title:'기차 4칸 완성',desc:'객차를 4칸까지 연결하세요.',goal:4,measure:s=>s.wagons.length,reward:{coins:430,scrap:85}},
+    {title:'첫 1,200m 돌파',desc:'멀리 달려 새로운 지역을 개척하세요.',goal:1200,measure:s=>s.distance,reward:{coins:580,scrap:110,ore:65}},
+    {title:'기관차 레벨 3',desc:'기관차를 강화해 운행 속도를 높이세요.',goal:3,measure:s=>s.engine,reward:{coins:850,ore:90}},
+    {title:'기차 8칸 완성',desc:'초장거리 산업 열차를 만드세요.',goal:8,measure:s=>s.wagons.length,reward:{coins:1600,scrap:200}},
+    {title:'누적 거리 5,000m',desc:'오로라 황야까지 달려 보세요.',goal:5000,measure:s=>s.distance,reward:{coins:2400,crystal:15}},
+    {title:'기차 12칸 완성',desc:'객차 12칸의 거대 열차를 만드세요.',goal:12,measure:s=>s.wagons.length,reward:{coins:4500,scrap:550}}
+  ];
+  function initialState(){
+    return {coins:145,scrap:48,ore:0,crystal:0,distance:0,earned:0,engine:1,wagons:[{id:1,type:'collector',level:1}],nextId:2,stations:0,nextStation:STATION_STEP,mission:0,discount:0,paused:false,stationOpen:false,boost:0,boostCooldown:0,selected:1,audio:false,lastSaved:Date.now(),run:1};
+  }
+  function readSave(){
+    try{
+      const raw=localStorage.getItem(KEY);
+      if(!raw) return initialState();
+      const saved=JSON.parse(raw);
+      if(!saved || !Array.isArray(saved.wagons) || !saved.wagons.length || saved.wagons.length>300 || saved.wagons.some(w=>!TYPE_MAP[w.type])) return initialState();
+      const s={...initialState(),...saved,paused:false,stationOpen:false,boost:0,selected:saved.selected||saved.wagons[0].id};
+      ['coins','scrap','ore','crystal','distance','earned'].forEach(k=>{s[k]=Number.isFinite(s[k])?Math.max(0,s[k]):0});
+      s.engine=clamp(Math.floor(s.engine)||1,1,100);
+      s.nextId=Math.max(s.nextId||2,...s.wagons.map(w=>w.id+1));
+      s.nextStation=Math.max(STATION_STEP,Math.ceil((s.distance+0.01)/STATION_STEP)*STATION_STEP);
+      s.mission=clamp(Math.floor(s.mission)||0,0,MISSIONS.length);
+      return s;
+    }catch(_){return initialState()}
+  }
+  let s=readSave();
+  const offlineSeconds=Math.min(3600,Math.max(0,(Date.now()-(s.lastSaved||Date.now()))/1000));
+  if(offlineSeconds>8){
+    const rates=approximateRates(s,getRegion(s.distance));
+    // Offline progression operates at 20% efficiency (capped at one hour).
+    const factor=offlineSeconds*.2;
+    const earned=Math.max(0,rates.coins)*factor;
+    s.coins+=earned;s.earned+=earned;
+    s.scrap+=Math.max(0,rates.scrap)*factor;
+    s.ore+=Math.max(0,rates.ore)*factor;
+  }
+  let lastFrame=performance.now(),uiTimer=0,saveTimer=0,animT=0,activeTab='shop',modalMode='',toastTimeouts=[];
+  let lastRates={coins:0,scrap:0,ore:0,crystal:0};
+  let audioCtx=null;
+  const canvas=$('gameCanvas'),ctx=canvas.getContext('2d');
+  if(!ctx){$('world-wrap')?.remove();return}
+
+  function getRegion(distance=s.distance){let found=REGIONS[0];for(const r of REGIONS){if(distance>=r.at)found=r}return found}
+  function speed(){return Math.max(.6,1+(.17*(s.engine-1))-(.018*s.wagons.length))*(s.boost>0?1.85:1)}
+  function strength(w,index){
+    let mul=Math.pow(1.42,w.level-1)*(1+.075*(s.engine-1));
+    if(s.boost>0)mul*=2.05;
+    for(const neighbor of [s.wagons[index-1],s.wagons[index+1]]){
+      if(!neighbor)continue;
+      if(neighbor.type==='dynamo')mul*=1+.25+.09*(neighbor.level-1);
+      if(neighbor.type==='booster')mul*=1+.55+.13*(neighbor.level-1);
+    }
+    return mul;
+  }
+  function approximateRates(st,region){
+    // This function intentionally works off state at the time of the call.
+    let coins=.7*speed(),scrap=0,ore=0;
+    for(let i=0;i<st.wagons.length;i++){
+      let w=st.wagons[i],m=strength(w,i);
+      if(w.type==='collector')scrap+=2.25*m*region.scrap;
+      if(w.type==='miner')ore+=.95*m*region.ore;
+      if(w.type==='market')coins+=10*m*(region.coin||1);
+      if(w.type==='smelter')coins+=18*m*(region.coin||1);
+    }
+    return {coins,scrap,ore};
+  }
+  function produce(dt){
+    const b={coins:s.coins,scrap:s.scrap,ore:s.ore,crystal:s.crystal};
+    const region=getRegion();
+    const v=speed();
+    const speedBonus=.88+.12*v;
+    const extra=region.at===4200?1.25:1;
+    s.coins+=.7*v*dt;
+    let scrapSum=0,oreSum=0;
+    for(let i=0;i<s.wagons.length;i++){
+      const w=s.wagons[i],m=strength(w,i)*speedBonus*extra;
+      if(w.type==='collector')scrapSum+=2.25*m*region.scrap*dt;
+      if(w.type==='miner'){
+        oreSum+=.95*m*region.ore*dt;
+        if(s.distance>=1450) s.crystal+=.015*m*region.crystal*dt;
+      }
+    }
+    s.scrap+=scrapSum;s.ore+=oreSum;
+    for(let i=0;i<s.wagons.length;i++){
+      const w=s.wagons[i],m=strength(w,i)*extra;
+      if(w.type==='market'){
+        const used=Math.min(s.scrap,1.7*m*dt);
+        s.scrap-=used;s.coins+=used*6.4*(region.coin||1);
+      }
+      if(w.type==='smelter'){
+        const used=Math.min(s.ore,.85*m*dt);
+        s.ore-=used;s.coins+=used*23*(region.coin||1);
+      }
+      if(w.type==='lab'){
+        const cycles=Math.min(1*m*dt,s.scrap/2.2,s.ore/.8);
+        s.scrap-=cycles*2.2;s.ore-=cycles*.8;s.crystal+=cycles*.3*region.crystal;
+      }
+    }
+    const gain=s.coins-b.coins;
+    s.earned+=Math.max(0,gain);
+    lastRates={coins:(gain/dt),scrap:(s.scrap-b.scrap)/dt,ore:(s.ore-b.ore)/dt,crystal:(s.crystal-b.crystal)/dt};
+  }
+  function engineCost(){return {coins:Math.round(220*Math.pow(1.75,s.engine-1)),ore:s.engine===1?0:Math.round(18*Math.pow(1.62,s.engine-2))}}
+  function wagonCost(t){
+    const owned=s.wagons.filter(w=>w.type===t.id).length;
+    const discount=s.discount>0?.65:1;
+    return {coins:Math.ceil(t.coin*Math.pow(1.23,owned)*discount),scrap:Math.ceil(t.scrap*Math.pow(1.18,owned)*discount)};
+  }
+  function upgradeCost(w){
+    const t=TYPE_MAP[w.type];
+    return {coins:Math.ceil(t.coin*(.9*Math.pow(1.8,w.level))),scrap:Math.ceil(t.scrap*(.65*Math.pow(1.65,w.level)))};
+  }
+  function enough(cost){return Object.keys(cost).every(k=>s[k]>=cost[k])}
+  function pay(cost){for(const k of Object.keys(cost))s[k]-=cost[k]}
+  function sound(type='buy'){
+    if(!s.audio)return;
+    try{
+      audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==='suspended')audioCtx.resume();
+      const notes=type==='station'?[440,554,659]:type==='error'?[210]:[480,660];
+      for(let i=0;i<notes.length;i++){
+        const o=audioCtx.createOscillator(),g=audioCtx.createGain(),at=audioCtx.currentTime+i*.085;
+        o.type='sine';o.frequency.setValueAtTime(notes[i],at);
+        g.gain.setValueAtTime(.045,at);g.gain.exponentialRampToValueAtTime(.001,at+.23);
+        o.connect(g);g.connect(audioCtx.destination);o.start(at);o.stop(at+.24);
+      }
+    }catch(_){/* No audio support: silently continue */}
+  }
+  function toast(message){
+    const el=document.createElement('div');el.className='toast';el.textContent=message;
+    const root=$('toastContainer');root.prepend(el);
+    while(root.children.length>3)root.lastChild.remove();
+    toastTimeouts.push(setTimeout(()=>el.remove(),3100));
+  }
+  function purchase(type){
+    const t=TYPE_MAP[type];if(!t)return;
+    if(s.distance<t.unlock){toast(`${fmt(t.unlock)}m 이후 해금됩니다.`);return}
+    if(s.wagons.length>=300){toast('최대 객차 수는 300칸입니다.');return}
+    const c=wagonCost(t);
+    if(!enough(c)){sound('error');toast('자원이 부족합니다.');return}
+    pay(c);
+    const wagon={id:s.nextId++,type:t.id,level:1};s.wagons.push(wagon);s.selected=wagon.id;
+    if(s.discount>0)s.discount--;
+    sound();toast(`${t.icon} ${t.name} 연결 완료! (+1칸)`);
+    checkMission();renderAll();saveGame();
+  }
+  function upgradeEngine(){
+    const c=engineCost();
+    if(!enough(c)){toast('기관차 강화 자원이 부족합니다.');return}
+    pay(c);s.engine++;
+    sound();toast(`🚂 기관차 Lv.${s.engine}! 운행 효율 증가`);
+    checkMission();renderAll();saveGame();
+  }
+  function upgradeWagon(){
+    const w=s.wagons.find(w=>w.id===s.selected);if(!w)return;
+    if(w.level>=20){toast('객차 최대 강화 레벨입니다.');return}
+    const c=upgradeCost(w);
+    if(!enough(c)){toast('강화 자원이 부족합니다.');return}
+    pay(c);w.level++;
+    sound();toast(`${TYPE_MAP[w.type].name} Lv.${w.level} 강화!`);renderAll();saveGame();
+  }
+  function moveWagon(dir){
+    const idx=s.wagons.findIndex(w=>w.id===s.selected),next=idx+dir;
+    if(idx<0||next<0||next>=s.wagons.length)return;
+    [s.wagons[idx],s.wagons[next]]=[s.wagons[next],s.wagons[idx]];
+    sound();renderAll();saveGame();
+  }
+  function sellWagon(){
+    const i=s.wagons.findIndex(w=>w.id===s.selected);
+    if(i<0||s.wagons.length<=1||s.wagons[i].id===1){toast('첫 번째 수집칸은 팔 수 없습니다.');return}
+    const w=s.wagons[i],t=TYPE_MAP[w.type],refund=Math.floor(t.coin*.55+(.5*w.level*t.coin));
+    if(!confirm(`${t.name}을(를) 판매해 ${fmt(refund)}코인을 받을까요?`))return;
+    s.coins+=refund;s.wagons.splice(i,1);s.selected=s.wagons[0].id;
+    toast(`${fmt(refund)}코인을 돌려받았습니다.`);renderAll();saveGame();
+  }
+  function checkMission(){
+    const m=MISSIONS[s.mission];if(!m)return;
+    if(m.measure(s)>=m.goal){
+      for(const [k,v] of Object.entries(m.reward)){s[k]+=v;if(k==='coins')s.earned+=v}
+      toast(`🏆 목표 달성! ${m.title}`);sound('station');s.mission++;
+    }
+  }
+  function stationArrival(){
+    s.stations++;s.stationOpen=true;s.paused=true;
+    const level=s.stations;
+    const rewardCoin=240+level*170, rewardScrap=72+level*52, rewardOre=level>=2?24+level*14:0;
+    showModal('STATION ARRIVAL',`🚉 ${level}번째 정거장 도착!`,`멋진 운행이었습니다. 역에서 물자를 보급받고 다음 구간으로 출발하세요. 보상 하나를 선택할 수 있습니다.`,[
+      {icon:'💰',title:`코인 ${fmt(rewardCoin)}개`,desc:'다음 객차 구매를 위한 자금을 확보합니다.',action:()=>{s.coins+=rewardCoin;s.earned+=rewardCoin}},
+      {icon:'📦',title:`고철 ${fmt(rewardScrap)}개${rewardOre?` + 광석 ${fmt(rewardOre)}개`:''}`,desc:'다양한 객차와 강화에 필요한 재료를 획득합니다.',action:()=>{s.scrap+=rewardScrap;s.ore+=rewardOre}},
+      {icon:'🏷️',title:'특급 제작 할인 2회',desc:'다음 두 번의 객차 구매 가격이 35% 저렴해집니다.',action:()=>{s.discount+=2}}
+    ],()=>{s.stationOpen=false;s.paused=false;checkMission();renderAll();saveGame();sound('station');toast('다음 구간으로 출발!')});
+  }
+  function showModal(kicker,title,desc,options,onDone){
+    modalMode=kicker;
+    $('modalKicker').textContent=kicker;
+    $('modalTitle').textContent=title;
+    $('modalDescription').textContent=desc;
+    $('modalChoices').innerHTML='';
+    options.forEach(o=>{
+      const b=document.createElement('button');b.className='reward-option';
+      const icon=document.createElement('span');icon.className='reward-emoji';icon.textContent=o.icon;
+      const content=document.createElement('div');
+      const h=document.createElement('div');h.className='reward-title';h.textContent=o.title;
+      const p=document.createElement('div');p.className='reward-desc';p.textContent=o.desc;
+      content.append(h,p);b.append(icon,content);
+      b.addEventListener('click',()=>{o.action();$('overlay').classList.add('hidden');modalMode='';if(onDone)onDone()});
+      $('modalChoices').append(b);
+    });
+    $('modalClose').style.display=kicker==='STATION ARRIVAL'?'none':'block';
+    $('overlay').classList.remove('hidden');
+  }
+  function closeModal(){
+    if(modalMode==='STATION ARRIVAL')return;
+    $('overlay').classList.add('hidden');modalMode='';
+  }
+  function saveGame(){
+    try{s.lastSaved=Date.now();localStorage.setItem(KEY,JSON.stringify(s));$('saveStatus').textContent='저장 완료'}
+    catch(_){$('saveStatus').textContent='저장 불가: 저장 공간 확인'}
+  }
+  function resetGame(){
+    if(!confirm('정말 모든 객차와 진행 상황을 초기화할까요? 이 작업은 되돌릴 수 없습니다.'))return;
+    const run=(s.run||1)+1;s=initialState();s.run=run;
+    localStorage.removeItem(KEY);$('overlay').classList.add('hidden');closeModal();renderAll();saveGame();toast('새 운행을 시작합니다.');
+  }
+  function priceHtml(cost){return `<span>${money(cost.coins)}</span><span>◆ ${fmt(cost.scrap)}</span>`}
+  function renderShop(){
+    const el=$('shopContent');
+    el.innerHTML=TYPES.map(t=>{
+      const locked=s.distance<t.unlock,c=wagonCost(t),can=enough(c)&&!locked;
+      return `<article class="wagon-card${locked?' locked':''}"><div class="wagon-card-top"><span class="wagon-symbol" style="background:${t.color}33;border-color:${t.color}77">${t.icon}</span><div><div class="wagon-title">${t.name}</div><div class="wagon-role">${t.role}</div></div></div><div class="wagon-desc">${t.desc}</div><div class="wagon-effect">↗ ${t.effect}</div><div class="wagon-bottom">${locked?`<span class="lock-tag">🔒 ${fmt(t.unlock)}m 해금</span>`:`<div class="cost-group">${priceHtml(c)}</div><button class="buy-btn" data-buy="${t.id}" ${can?'':'disabled'}>+ 연결</button>`}</div></article>`;
+    }).join('');
+  }
+  function renderManage(){
+    $('wagonList').innerHTML=s.wagons.map((w,i)=>{
+      const t=TYPE_MAP[w.type];return `<button class="wagon-chip${s.selected===w.id?' active':''}" data-select="${w.id}"><span class="wagon-chip-icon">${t.icon}</span><span>${i+1}. ${t.name}<small>레벨 ${w.level}</small></span></button>`;
+    }).join('');
+    const w=s.wagons.find(w=>w.id===s.selected)||s.wagons[0];if(!w)return;
+    s.selected=w.id;
+    const i=s.wagons.indexOf(w),t=TYPE_MAP[w.type],c=upgradeCost(w);
+    const neighborhood=[s.wagons[i-1],s.wagons[i+1]].filter(Boolean).map(n=>TYPE_MAP[n.type].name).join(', ')||'없음';
+    $('wagonDetail').innerHTML=`<div class="wagon-detail-head"><span class="wagon-symbol" style="background:${t.color}33">${t.icon}</span><div><h3>${t.name} · Lv.${w.level}</h3><p>${t.desc}</p></div></div><div class="detail-bonus">현재 인접 객차: ${neighborhood}<br>생산 능력 배율: ×${strength(w,i).toFixed(2)} ${w.id===1?'· 최초 수집칸':''}</div><div class="detail-buttons"><button class="upgrade" data-action="upgrade" ${w.level>=20||!enough(c)?'disabled':''}>↗ 강화 (${money(c.coins)}, ◆ ${fmt(c.scrap)})</button><button data-action="left" ${i===0?'disabled':''}>← 왼쪽</button><button data-action="right" ${i===s.wagons.length-1?'disabled':''}>오른쪽 →</button><button data-action="sell" ${w.id===1?'disabled':''}>판매</button></div>`;
+  }
+  function renderNumbers(){
+    $('coins').textContent=fmt(s.coins);$('scrap').textContent=fmt(s.scrap);$('ore').textContent=fmt(s.ore);$('crystal').textContent=fmt(s.crystal);
+    $('distance').textContent=fmt(s.distance)+'m';$('wagonsCount').textContent=s.wagons.length+'칸';$('trainLength').textContent=`전체 길이 ${Math.round(14+s.wagons.length*10)}m`;
+    const flow=(num)=>`${num>=0?'+':''}${Math.abs(num)<10?num.toFixed(1):fmt(Math.abs(num))}${num<0?' 감소':''}/초`;
+    $('coinRate').textContent=flow(lastRates.coins);$('scrapRate').textContent=flow(lastRates.scrap);$('oreRate').textContent=flow(lastRates.ore);$('crystalRate').textContent=flow(lastRates.crystal);
+    $('scrapRate').style.color=lastRates.scrap>=0?'#72d6aa':'#f3988d';
+    $('oreRate').style.color=lastRates.ore>=0?'#72d6aa':'#f3988d';
+    $('speedText').textContent=`속도 ${speed().toFixed(2)}×`;
+    $('engineLvl').textContent=s.engine;$('engineSpeed').textContent=speed().toFixed(2)+'×';$('engineBonus').textContent=`+${Math.round((s.engine-1)*7.5)}%`;
+    $('lifetimeCoins').textContent=fmt(s.earned);$('runNumber').textContent=String(s.run||1).padStart(3,'0');
+    const c=engineCost();$('engineCost').textContent=`${money(c.coins)}${c.ore?' · ⬡ '+fmt(c.ore):''}`;$('engineBtn').disabled=!enough(c);
+    const r=getRegion();$('regionIcon').textContent=r.icon;$('regionName').textContent=r.name;$('weatherLabel').textContent=r.weather;
+    const remain=Math.max(0,s.nextStation-s.distance);
+    $('stationMeters').textContent=fmt(remain)+'m';$('nextStationText').textContent=`다음 역 ${fmt(remain)}m`;
+    $('stationProgress').style.width=`${clamp((1-remain/STATION_STEP)*100,0,100)}%`;
+    $('canvasTrainText').textContent=`기관차 + 객차 ${s.wagons.length}칸`;
+    $('pauseBtn').textContent=s.paused?'▶ 이어 달리기':'Ⅱ 일시정지';
+    $('autoMoveStatus').textContent=s.paused?'일시 정지':'가동 중';
+    $('boostTimer').textContent=s.boost>0?`${s.boost.toFixed(0)}초 남음`:s.boostCooldown>0?`${s.boostCooldown.toFixed(0)}초 대기`:'준비 완료';
+    $('boostBtn').disabled=s.boost>0||s.boostCooldown>0||s.paused;
+    $('audioBtn').textContent=s.audio?'🔊':'🔇';
+    const m=MISSIONS[s.mission];
+    if(!m){$('missionTitle').textContent='모든 목표 달성!';$('missionDesc').textContent='계속해서 기차를 확장하고 새로운 기록에 도전하세요.';$('missionBar').style.width='100%';$('missionProgressText').textContent='완료';$('missionReward').textContent='축하합니다';}
+    else{$('missionTitle').textContent=m.title;$('missionDesc').textContent=m.desc;const progress=Math.min(m.goal,m.measure(s));$('missionBar').style.width=`${progress/m.goal*100}%`;$('missionProgressText').textContent=`${fmt(progress)} / ${fmt(m.goal)}`;$('missionReward').textContent='보상 '+Object.entries(m.reward).map(([k,v])=>`${{coins:'코인',scrap:'고철',ore:'광석',crystal:'결정'}[k]} +${fmt(v)}`).join(' · ')}
+  }
+  function renderAll(){renderNumbers();renderShop();renderManage()}
+
+  /* All scenery is generated using Canvas2D. No external art assets needed. */
+  const rnd=(n)=>{const q=Math.sin(n*127.1+78.233)*43758.5453;return q-Math.floor(q)};
+  const roundRect=(x,y,w,h,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
+  const line=(x1,y1,x2,y2,color,width=1)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()};
+  function drawLandscape(t,region){
+    const grad=ctx.createLinearGradient(0,0,0,310);grad.addColorStop(0,region.sky[0]);grad.addColorStop(1,region.sky[1]);ctx.fillStyle=grad;ctx.fillRect(0,0,WORLD_W,WORLD_H);
+    ctx.save();ctx.globalAlpha=.36;
+    ctx.fillStyle=region.at>=2550?'#e7b8b0':'#ffe9b1';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=46;
+    ctx.beginPath();ctx.arc(960,84,36,0,Math.PI*2);ctx.fill();ctx.restore();
+    for(let layer=0;layer<3;layer++){
+      const base=285+layer*20,shift=s.distance*(.08+.075*layer);
+      ctx.fillStyle=region.hill[layer];ctx.beginPath();ctx.moveTo(0,WORLD_H);ctx.lineTo(0,base);
+      for(let x=0;x<=WORLD_W+20;x+=13){
+        const xx=x+shift,wave=Math.sin(xx/(88-layer*8)+layer*2)*18+Math.sin(xx/31+layer*7)*6;
+        const mountain=region.name.includes('협곡')?Math.abs(Math.sin(xx/100+layer))*21:region.name.includes('설원')?Math.abs(Math.sin(xx/70+layer))*23:0;
+        ctx.lineTo(x,base+wave-mountain);
+      }
+      ctx.lineTo(WORLD_W,WORLD_H);ctx.closePath();ctx.fill();
+    }
+    const off=(s.distance*.3)%240;
+    for(let n=-1;n<7;n++){
+      const x=n*240-off+(rnd(n+12)*45);
+      if(region.at<620){
+        line(x+50,314,x+50,275,'#3b6655',5);
+        for(let j=0;j<3;j++){ctx.fillStyle=['#467a69','#588974','#719d78'][j];ctx.beginPath();ctx.arc(x+50+j*8-8,275-j*11,19-j*4,0,7);ctx.fill()}
+      }else if(region.at<1450){
+        roundRect(x+25,271,76,43,8,'#9c6857');roundRect(x+39,255,49,29,5,'#ba806a');
+      }else if(region.at<2550){
+        ctx.fillStyle='#e4f4f5';ctx.beginPath();ctx.moveTo(x,310);ctx.lineTo(x+44,245);ctx.lineTo(x+90,310);ctx.fill();
+      }else{
+        ctx.fillStyle='#4a556a';ctx.beginPath();ctx.moveTo(x,316);ctx.lineTo(x+31,280);ctx.lineTo(x+57,310);ctx.fill();
+      }
+    }
+    ctx.fillStyle=region.ground;ctx.fillRect(0,316,WORLD_W,WORLD_H-316);
+    // Track: sleepers, rails, and polished highlights.
+    roundRect(0,354,WORLD_W,12,2,'#444652');
+    const sleeperOff=(s.distance*speed()*1.1)%53;
+    for(let x=-60-sleeperOff;x<1250;x+=53){roundRect(x,354,36,27,3,'#6b5749');line(x+7,355,x+7,380,'#483f3c',2)}
+    roundRect(0,350,WORLD_W,6,1,'#b9c3ce');roundRect(0,376,WORLD_W,5,1,'#a3b0b6');
+    ctx.globalAlpha=.28;ctx.fillStyle='#182a33';for(let i=0;i<15;i++){const x=((i*111-s.distance*.9)%1300+1300)%1300;roundRect(x,393+(i%3)*15,29,4,2,'#1c2830')}ctx.globalAlpha=1;
+  }
+  function drawWheel(cx,cy,r,t){
+    ctx.fillStyle='#2e3545';ctx.beginPath();ctx.arc(cx,cy,r+4,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#99a9b8';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#7c94a3';ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
+    for(let i=0;i<5;i++){let a=i*Math.PI*2/5+t*3;line(cx,cy,cx+Math.cos(a)*(r-3),cy+Math.sin(a)*(r-3),'#88959c',2)}
+  }
+  function drawWagon(x,y,wagon,index,t){
+    const def=TYPE_MAP[wagon.type],selected=s.selected===wagon.id;
+    if(selected){ctx.strokeStyle='#ffda8e';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.strokeRect(x-4,y-12,103,78);ctx.setLineDash([])}
+    roundRect(x+4,y+49,86,7,3,'#3d4e5e');
+    roundRect(x,y,95,55,7,'#253548');roundRect(x+3,y+3,89,49,5,def.color);
+    roundRect(x+2,y,91,10,4,'#ffffff22');roundRect(x+7,y+11,22,23,3,'#b7e3e8');roundRect(x+34,y+11,19,23,3,'#a7d8df');
+    roundRect(x+59,y+11,27,25,3,'#24374975');
+    ctx.fillStyle='#ffffffdd';ctx.font='bold 19px system-ui';ctx.textAlign='center';ctx.fillText(({collector:'U',market:'$',miner:'◆',smelter:'♨',dynamo:'ϟ',booster:'✦',lab:'◈'})[wagon.type],72+x,y+31);
+    roundRect(x+5,y+40,85,8,3,'#18233188');
+    ctx.fillStyle='#fff9';ctx.font='bold 9px system-ui';ctx.textAlign='left';ctx.fillText('LV '+wagon.level,x+10,y+47);
+    drawWheel(x+20,y+60,10,t);drawWheel(x+76,y+60,10,t);
+    line(x+95,y+47,x+104,y+47,'#9aa6b4',4);
+    if(wagon.type==='smelter'||wagon.type==='dynamo'){
+      roundRect(x+20,y-20,10,21,2,'#425262');
+      for(let j=0;j<3;j++){ctx.fillStyle=`rgba(234,239,239,${Math.max(0,.26-j*.065)})`;ctx.beginPath();ctx.arc(x+20+j*9-(t*18%24),y-30-j*12,7+j*2,0,7);ctx.fill()}
+    }
+    if(wagon.type==='collector'){
+      ctx.strokeStyle='#f8d4a2';ctx.lineWidth=5;ctx.beginPath();ctx.arc(x+49,y-2,14,Math.PI,0);ctx.stroke();
+    }
+  }
+  function drawEngine(x,y,t){
+    // Main locomotive: facing right, locomotive wheel assemblies and cabin.
+    roundRect(x+5,y+59,150,9,4,'#263a4b');
+    roundRect(x+24,y-6,111,60,10,'#c75e4b');
+    roundRect(x+30,y,98,48,7,'#e07b56');
+    roundRect(x+5,y-33,61,76,6,'#33566c');roundRect(x+12,y-25,47,29,5,'#b7e7ef');
+    roundRect(x+68,y-15,56,19,8,'#cbd8cb');
+    roundRect(x+65,y+8,77,32,6,'#d9916b');
+    roundRect(x+75,y+14,40,10,5,'#f5bf8a');
+    roundRect(x+109,y-43,18,35,4,'#405065');roundRect(x+102,y-45,32,8,4,'#31465b');
+    roundRect(x+125,y-3,27,38,6,'#e9b36a');
+    roundRect(x-2,y+39,162,12,3,'#363d4c');
+    for(let j=0;j<3;j++)drawWheel(x+26+j*51,y+61,j===1?15:12,t);
+    ctx.fillStyle='#ffe3ae';ctx.beginPath();ctx.arc(x+149,y+8,8,0,7);ctx.fill();
+    ctx.fillStyle='#fff5c9';ctx.shadowColor='#ffe6a7';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(x+151,y+8,5,0,7);ctx.fill();ctx.shadowBlur=0;
+    // Smoke puffs.
+    for(let i=0;i<6;i++){
+      const phase=(t*.5+i*.18)%1,px=x+119-phase*42+i*3,py=y-49-phase*85;
+      ctx.fillStyle=`rgba(230,236,231,${(1-phase)*.40})`;
+      ctx.beginPath();ctx.arc(px,py,9+phase*20,0,7);ctx.fill();
+    }
+  }
+  function drawParticles(t){
+    const carCount=Math.min(s.wagons.length,8);
+    const locX=WORLD_W-185,baseY=289;
+    const n=Math.min(17,Math.floor(2+s.wagons.length*1.3));
+    for(let i=0;i<n;i++){
+      const phase=(t*.32+rnd(i*16)*.8)%1;
+      const xx=locX-58-rnd(i+3)*Math.min(890,carCount*101)+Math.sin(t+i)*12;
+      const yy=baseY+34-phase*90+(rnd(i+8)-.5)*23;
+      ctx.globalAlpha=(1-phase)*.65;
+      ctx.fillStyle=i%4===0?'#ffd28b':i%4===1?'#90d8e7':i%4===2?'#a5e2c9':'#f4bca5';
+      ctx.beginPath();ctx.arc(xx,yy,2.5+rnd(i)*3,0,7);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  function renderWorld(t){
+    const region=getRegion(),baseY=288,locX=WORLD_W-185;
+    ctx.clearRect(0,0,WORLD_W,WORLD_H);drawLandscape(t,region);
+    let visible=Math.min(s.wagons.length,9);
+    for(let j=visible-1;j>=0;j--){
+      const w=s.wagons[j],x=locX-108-(j+1)*103;
+      if(x>-112)drawWagon(x,baseY+1,w,j,t);
+    }
+    drawEngine(locX,baseY-3,t);drawParticles(t);
+    if(s.wagons.length>visible){roundRect(18,260,145,38,8,'#1b2e42cc');ctx.fillStyle='#fff4dd';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.fillText(`← 추가 ${s.wagons.length-visible}칸`,90,283)}
+    if(s.paused&&!s.stationOpen){roundRect(445,159,310,85,16,'#0d1b2be0');ctx.fillStyle='#f8ebd6';ctx.textAlign='center';ctx.font='bold 26px system-ui';ctx.fillText('Ⅱ  일시정지',600,209)}
+  }
+  canvas.addEventListener('click',e=>{
+    const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*(WORLD_W/rect.width),locX=WORLD_W-185;
+    for(let j=0;j<Math.min(9,s.wagons.length);j++){
+      const left=locX-108-(j+1)*103;
+      if(x>=left&&x<left+100){s.selected=s.wagons[j].id;activateTab('manage');renderManage();toast(`${TYPE_MAP[s.wagons[j].type].name} 선택됨`);return}
+    }
+  });
+  function activateTab(tab){activeTab=tab;$('shopContent').classList.toggle('hidden',tab!=='shop');$('manageContent').classList.toggle('hidden',tab!=='manage');$('shopTab').classList.toggle('active',tab==='shop');$('manageTab').classList.toggle('active',tab==='manage')}
+
+  $('shopContent').addEventListener('click',e=>{const b=e.target.closest('[data-buy]');if(b)purchase(b.dataset.buy)});
+  $('wagonList').addEventListener('click',e=>{const b=e.target.closest('[data-select]');if(b){s.selected=Number(b.dataset.select);renderManage()}});
+  $('wagonDetail').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;({upgrade:upgradeWagon,left:()=>moveWagon(-1),right:()=>moveWagon(1),sell:sellWagon})[b.dataset.action]?.()});
+  $('engineBtn').addEventListener('click',upgradeEngine);
+  $('shopTab').addEventListener('click',()=>activateTab('shop'));$('manageTab').addEventListener('click',()=>{activateTab('manage');renderManage()});
+  $('pauseBtn').addEventListener('click',()=>{if(s.stationOpen)return;s.paused=!s.paused;renderNumbers()});
+  $('boostBtn').addEventListener('click',()=>{if(s.boost>0||s.boostCooldown>0||s.paused)return;s.boost=9;s.boostCooldown=38;sound('station');toast('⚡ 급행 운행! 9초간 생산량 폭증');renderNumbers()});
+  $('audioBtn').addEventListener('click',()=>{s.audio=!s.audio;renderNumbers();sound()});
+  $('resetBtn').addEventListener('click',resetGame);
+  $('modalClose').addEventListener('click',closeModal);
+  $('helpBtn').addEventListener('click',()=>showModal('HOW TO PLAY','열차 운행 가이드','기차는 자동으로 전진합니다. 자원을 모아 객차를 연결하고 성장시키세요. 정거장에 도착하면 무료 보상을 하나 선택할 수 있습니다.',[
+    {icon:'🧲',title:'수집칸 + 판매칸',desc:'고철을 모아서 코인으로 자동 판매합니다.',action:()=>{}},
+    {icon:'⛏️',title:'채굴칸 + 용광로칸',desc:'광석을 생산하고 더 높은 수익을 얻습니다.',action:()=>{}},
+    {icon:'⚡',title:'객차 배치 변경',desc:'발전칸과 증폭칸을 생산 객차 양옆에 배치하세요.',action:()=>{activateTab('manage');renderManage()}}
+  ],()=>{}));
+  window.addEventListener('pagehide',saveGame);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame();lastFrame=performance.now()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(e.code==='Space'&&e.target===document.body&&!s.stationOpen){e.preventDefault();s.paused=!s.paused;renderNumbers()}});
+
+  const TIPS=[
+    '수집칸이 고철을 모으고, 판매칸이 고철을 코인으로 바꿉니다. 두 객차를 조합해 보세요.',
+    '발전 동력칸은 바로 양옆 객차의 생산력을 높입니다. 편성 관리에서 객차 순서를 바꿔 보세요.',
+    '기관차를 강화하면 더 빨리 이동하고 자원 수집 효율도 높아집니다.',
+    '새 지역으로 진입하면 특정 자원의 생산 효율이 높아집니다.',
+    '급행 운행은 9초간 강력한 생산 보너스를 제공합니다. 필요할 때 사용하세요.',
+    '정거장에 도착하면 세 가지 보상 가운데 하나를 선택할 수 있습니다.'
+  ];
+  let tipTime=0,tipIndex=0;
+  function loop(now){
+    const dt=clamp((now-lastFrame)/1000,0,.075);lastFrame=now;animT+=dt;
+    if(!s.paused){
+      if(s.boost>0)s.boost=Math.max(0,s.boost-dt);
+      if(s.boostCooldown>0)s.boostCooldown=Math.max(0,s.boostCooldown-dt);
+      s.distance+=11.7*speed()*dt;
+      produce(dt);
+      checkMission();
+      if(s.distance>=s.nextStation){s.nextStation+=STATION_STEP;stationArrival()}
+    }
+    renderWorld(animT);
+    uiTimer+=dt;saveTimer+=dt;tipTime+=dt;
+    if(uiTimer>.45){uiTimer=0;renderNumbers();if(activeTab==='shop')renderShop();else renderManage()}
+    if(saveTimer>8){saveTimer=0;saveGame()}
+    if(tipTime>15){tipTime=0;tipIndex=(tipIndex+1)%TIPS.length;$('gameTip').textContent=TIPS[tipIndex]}
+    requestAnimationFrame(loop);
+  }
+  renderAll();requestAnimationFrame(loop);
+  if(s.wagons.length===1&&s.distance<100)setTimeout(()=>toast('🚂 환영합니다! 첫 객차를 구매해 기차를 확장하세요.'),900);
+})();
+
+</script>
+</body>
+</html>
