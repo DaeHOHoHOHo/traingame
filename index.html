@@ -1,61 +1,65 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1322"><meta name="description" content="열차가 달릴수록 거대해지는 무료 성장형 기차 게임. 객차를 조합하고 대륙을 개척하세요.">
-<title>ENDLESS TRAIN — Railway Empire</title><link rel="stylesheet" href="./style.css?v=2.1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#090f1e">
+<meta name="description" content="중앙 타워 하나를 지키는 5분 로그라이트. 자동 공격, 무작위 강화, 거대한 연쇄 폭발.">
+<title>LAST TOWER — 타워 하나만 지켜라</title>
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <div id="app">
-  <header class="topbar">
-    <div class="brand"><div class="brand-icon">🚂</div><div><small>THE INFINITE RAILWAY</small><strong>ENDLESS <em>TRAIN</em></strong></div></div>
-    <div class="top-center"><span class="status-dot"></span><span id="runningStatus">자동 운행 중</span><span class="sep"></span><span id="biomeHeader">햇살 초원</span><span class="sep"></span><span class="version">EARLY ACCESS · v0.2</span></div>
-    <div class="header-actions"><button id="audioBtn" class="icon-btn" title="효과음 켜기/끄기" aria-label="효과음 켜기/끄기">♪</button><button id="helpBtn" class="icon-btn" title="도움말" aria-label="게임 도움말">?</button><button id="saveBtn" class="outline-btn">저장</button><button id="resetBtn" class="icon-btn" title="게임 초기화" aria-label="게임 초기화">↻</button></div>
-  </header>
-  <div class="resourcebar" aria-label="보유 자원">
-    <div class="resource"><div class="resource-symbol amber">●</div><div><span>보유 코인</span><strong id="coins">0</strong><small id="rateCoin">+0/s</small></div></div>
-    <div class="resource"><div class="resource-symbol peach">⬡</div><div><span>고철</span><strong id="scrap">0</strong><small id="rateScrap">+0/s</small></div></div>
-    <div class="resource"><div class="resource-symbol sky">◆</div><div><span>광석</span><strong id="ore">0</strong><small id="rateOre">+0/s</small></div></div>
-    <div class="resource"><div class="resource-symbol violet">✦</div><div><span>결정</span><strong id="crystal">0</strong><small id="rateCrystal">+0/s</small></div></div>
-    <div class="resource metric"><div class="resource-symbol green">◈</div><div><span>주행 거리</span><strong id="distance">0m</strong><small id="speedValue">1.0×</small></div></div>
-    <div class="resource metric"><div class="resource-symbol blue">▤</div><div><span>연결 객차</span><strong id="wagonCount">1칸</strong><small id="synergyValue">시너지 ×1.00</small></div></div>
+<header class="topbar">
+  <div class="brand"><div class="brandmark">◆</div><div class="brandtext"><b>LAST<span>TOWER</span></b><small>THE LAST LINE OF DEFENSE</small></div></div>
+  <div class="top-stats">
+    <div class="top-stat"><small>웨이브</small><strong id="waveHud">01 <span>/ 12</span></strong></div>
+    <div class="top-stat"><small>처치</small><strong id="killHud">0</strong></div>
+    <div class="top-stat"><small>점수</small><strong id="scoreHud">0</strong></div>
   </div>
-  <main class="game-shell">
-    <section class="scene-panel card">
-      <div class="panel-top"><div class="flex-title"><span class="label-tag">LIVE EXPEDITION</span><strong id="regionName">햇살 초원</strong><span class="region-bonus" id="regionBonus">고철 획득 +25%</span></div><div class="scene-toolbar"><button id="cameraLeft" title="앞 객차 보기">←</button><span id="cameraLabel">기관차 시점</span><button id="cameraRight" title="뒤 객차 보기">→</button></div></div>
-      <div class="canvas-shell"><canvas id="gameCanvas" aria-label="기차가 지나가는 게임 화면. 고철 더미를 클릭하면 추가 자원을 얻습니다."></canvas><div class="scene-hud scene-hud-left"><span class="live-light"></span> RUNNING TRAIN</div><div class="scene-hud scene-hud-right" id="trainSceneInfo">기관차 · 객차 1칸</div><div class="scene-tip" id="sceneTip">선로의 빛나는 보급품을 클릭해 수집!</div><div id="toastStack" role="status" aria-live="polite"></div></div>
-      <div class="scene-controls"><div class="station-progress"><div class="station-between"><span>다음 정거장 <b id="nextStation">650m</b></span><span id="stationLabel">1번 역</span></div><div class="meter"><div class="meter-fill" id="stationBar"></div></div></div><div class="scene-buttons"><button id="pauseBtn" class="btn btn-secondary">Ⅱ 일시정지</button><button id="boostBtn" class="btn btn-gold">⚡ 급행 운행 <span id="boostTime">준비 완료</span></button></div></div>
-    </section>
-    <section class="status-panel card">
-      <div class="card-header"><div><small>CONTROL ROOM</small><h2>기관차 관제실</h2></div><span class="panel-glyph">✧</span></div>
-      <div class="engine-highlight"><div><small>기관차 등급</small><strong>LEVEL <span id="engineLvl">1</span></strong></div><div class="engine-emblem">⚙</div></div>
-      <div class="engine-data"><div><span>현재 속도</span><strong id="engineSpeed">1.0×</strong></div><div><span>전체 생산 배율</span><strong id="productionMult">×1.00</strong></div><div><span>연속 수송 거리</span><strong id="runDistance">0m</strong></div><div><span>지금까지 번 코인</span><strong id="earnedTotal">0</strong></div></div>
-      <button id="engineBtn" class="btn btn-gold engine-btn"><span>기관차 업그레이드</span><small id="engineCost">● 220</small></button>
-      <div class="mini-note" id="engineHint">업그레이드하면 주행 속도와 모든 객차 생산 효율이 증가합니다.</div>
-    </section>
-    <section class="bottom-panel mission-panel card">
-      <div class="card-header"><div><small>PROGRESS & MISSIONS</small><h2>원정 기록</h2></div><span class="little-chip" id="missionStage">목표 1</span></div>
-      <div class="missions-inner internal-scroll">
-        <div class="mission-card"><div class="mission-top"><span class="mission-badge">MAIN GOAL</span><span id="missionProgressText">0 / 1</span></div><h3 id="missionTitle">첫 객차 추가</h3><p id="missionDesc">객차를 구매해 열차를 확장하세요.</p><div class="meter mission-meter"><div class="meter-fill" id="missionBar"></div></div><div class="reward-line" id="missionReward">보상 ● 160</div></div>
-        <div class="subheading"><strong>운송 계약</strong><span>재료를 납품해 추가 보상 획득</span></div>
-        <div class="contracts" id="contractList"></div>
-        <div class="subheading"><strong>업적 달성</strong><span id="achievementCount">0 / 0</span></div>
-        <div class="achievement-list" id="achievementList"></div>
-      </div>
-    </section>
-    <section class="bottom-panel workshop-panel card">
-      <div class="card-header workshop-header"><div><small>BUILD YOUR RAILWAY</small><h2>열차 제작소</h2></div><div class="subtabs" id="workTabs"><button class="subtab active" data-tab="shop">객차 구매</button><button class="subtab" data-tab="formation">열차 편성</button></div></div>
-      <div id="shopView" class="work-content internal-scroll"><div class="shop-intro">객차를 늘리고 기능을 조합해 생산량을 폭발적으로 키우세요.</div><div id="shopList" class="shop-list"></div></div>
-      <div id="formationView" class="work-content internal-scroll hidden"><div class="shop-intro">객차를 선택해 순서를 바꾸거나 강화하세요. <b>인접한 발전칸·증폭칸의 효과를 활용할 수 있습니다.</b></div><div class="wagon-track" id="wagonTrack"></div><div id="wagonDetail" class="wagon-detail"></div></div>
-    </section>
-    <section class="bottom-panel research-panel card">
-      <div class="card-header"><div><small>IMPROVE & DISCOVER</small><h2>철도 연구소</h2></div><span class="little-chip">PERMANENT</span></div>
-      <div class="research-scroll internal-scroll"><div class="shop-intro">연구로 생산 방식을 개선하고 새로운 운행 능력을 해금하세요.</div><div id="researchList" class="research-list"></div><div class="subheading"><strong>운행 기록</strong><span id="stationCount">정거장 0회 방문</span></div><div class="events" id="eventLog"></div></div>
-    </section>
-    <nav class="mobile-tabs" aria-label="모바일 관리 메뉴"><button class="mobtab active" data-mobile="workshop">제작·편성</button><button class="mobtab" data-mobile="mission">목표·계약</button><button class="mobtab" data-mobile="research">연구·기록</button><button class="mobtab" data-mobile="status">기관차</button></nav>
-  </main>
+  <div class="top-actions"><button class="icon-button" id="soundBtn" type="button" title="소리 켜기 / 끄기">♪<span class="slash">/</span></button><button class="icon-button" id="pauseBtn" type="button" title="일시정지 (P)">Ⅱ</button></div>
+</header>
+<main class="layout">
+ <section class="arena-panel" aria-label="게임 화면">
+  <canvas id="game" aria-label="자동 공격하는 타워와 몰려오는 적들"></canvas>
+  <div class="arena-top">
+   <div class="wave-box"><div class="wave-caption"><span id="waveLabel">웨이브 1 · 황무지</span><span id="waveTime">00:00</span></div><div class="progress-track"><div id="waveProgress" class="progress-fill"></div></div></div>
+   <div class="game-phase" id="phaseChip">준비 중</div>
+  </div>
+  <div class="combo-display" id="comboView" hidden>연쇄 처치 <strong id="comboN">x2</strong></div>
+  <div class="float-announcement" id="announcement" aria-live="polite"></div>
+  <div class="arena-bottom">
+   <div class="hp-panel"><div class="hp-heading"><span>◆ 중앙 코어</span><b id="hpNum">180 / 180</b></div><div class="hp-track"><div class="hp-fill" id="hpBar"></div></div></div>
+   <button type="button" class="pulse-button" id="pulseBtn"><span class="pulse-icon">✦</span><span class="pulse-txt"><b>충격파</b><small id="pulseTime">SPACE / 준비 완료</small></span><span class="pulse-ring" id="pulseRing"></span></button>
+  </div>
+  <div class="screen-tint" id="screenTint"></div>
+  <div class="overlay" id="overlay">
+   <div id="overlayContent" class="modal start-modal"></div>
+  </div>
+ </section>
+ <aside class="sidebar" aria-label="게임 상태 및 강화 능력">
+  <div class="side-head"><span class="eyebrow">COMMAND CENTER</span><h2>방어 현황</h2><p>자동으로 공격하는 타워를 진화시키세요.</p></div>
+  <div class="side-scroll">
+   <div class="stat-grid">
+    <div class="stat-cell"><span>공격력</span><strong id="statDmg">16</strong></div>
+    <div class="stat-cell"><span>초당 발사</span><strong id="statSpeed">1.9</strong></div>
+    <div class="stat-cell"><span>멀티샷</span><strong id="statShots">1발</strong></div>
+    <div class="stat-cell"><span>치명타</span><strong id="statCrit">5%</strong></div>
+   </div>
+   <div class="section-heading"><h3>현재 빌드</h3><span id="buildCount">0 / 11</span></div>
+   <div id="buildList" class="build-list"><div class="empty-build"><span>✧</span> 웨이브를 클리어하면<br>강력한 능력이 쌓입니다.</div></div>
+   <div class="section-heading"><h3>웨이브 목표</h3><span>3단계 보스</span></div>
+   <div class="milestones">
+    <div class="milestone" id="boss4"><span class="milestone-dot"></span><span>4 웨이브</span><strong>철갑 거인</strong></div>
+    <div class="milestone" id="boss8"><span class="milestone-dot"></span><span>8 웨이브</span><strong>균열의 핵</strong></div>
+    <div class="milestone" id="boss12"><span class="milestone-dot"></span><span>12 웨이브</span><strong>최후의 침공</strong></div>
+   </div>
+  </div>
+  <div class="side-footer"><div><span>최고 기록</span><b id="bestScore">0</b></div><div><span>최고 웨이브</span><b id="bestWave">—</b></div></div>
+ </aside>
+</main>
+<footer class="footer"><span class="live-dot"></span><span>방치형이 아닌 <b>자동 공격 로그라이트</b></span><span class="footer-right">강화 선택: 클릭 · 충격파: SPACE · 일시정지: P</span></footer>
 </div>
-<div class="overlay hidden" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal card"><div class="modal-top"><span class="label-tag" id="modalKicker">STATION ARRIVAL</span><button id="modalClose" class="modal-close" aria-label="닫기">×</button></div><h2 id="modalTitle">정거장 도착</h2><p id="modalDesc"></p><div id="modalChoices" class="modal-options"></div></div></div>
-<script src="./game.js?v=2.1" defer></script>
+<script src="./game.js" defer></script>
 </body>
 </html>
