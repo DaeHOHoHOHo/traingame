@@ -1,48 +1,577 @@
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07121f">
-<meta name="description" content="심해에서 보물을 인양하고 계약을 완수하며 크레인을 강화하는 무료 브라우저 로그라이트 게임">
-<title>DEEP SALVAGE — 심해 인양 계약</title>
-<link rel="stylesheet" href="style.css?v=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>빚쟁이 농부</title>
+  <style>
+:root{
+  --bg:#8ccf8a;
+  --bg2:#76b977;
+  --panel:rgba(35,54,35,0.78);
+  --stroke:rgba(255,255,255,0.16);
+  --text:#f6f2df;
+  --muted:#cde6c7;
+  --accent:#ffd66b;
+  --green:#8fe46a;
+  --red:#ff8a8a;
+  --shadow:0 12px 32px rgba(0,0,0,.26);
+}
+*{box-sizing:border-box; user-select:none; -webkit-user-select:none;}
+html,body{margin:0; width:100%; height:100%; overflow:hidden; background:linear-gradient(#95d898,#72b977); font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--text);} 
+#app{position:relative; width:100vw; height:100vh; overflow:hidden;}
+#game{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges;}
+.glass{background:var(--panel); border:1px solid var(--stroke); border-radius:16px; backdrop-filter: blur(6px); box-shadow:var(--shadow);}
+.hud{position:absolute; left:16px; right:16px; padding:10px 14px; z-index:20;}
+#hudTop{top:16px; display:flex; justify-content:space-between; align-items:center; gap:12px;}
+.brand .title{font-size:22px; font-weight:800; line-height:1;}
+.brand .sub{font-size:12px; color:var(--muted); margin-top:4px;}
+.stats{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+.pill{padding:8px 12px; border-radius:12px; background:rgba(255,255,255,0.08); min-width:88px; text-align:center;}
+.pill span{display:block; font-size:11px; color:var(--muted);}
+.pill strong{display:block; font-size:16px; margin-top:2px;}
+.pill.debt strong{color:#ffdb84;}
+#hudBottom{position:absolute; left:16px; right:260px; bottom:16px; z-index:20; padding:12px; display:flex; align-items:center; gap:12px;}
+#hotbar{display:flex; gap:8px; flex:1; overflow:auto hidden; scrollbar-width:none;}
+#hotbar::-webkit-scrollbar{display:none;}
+.toolBtn{min-width:80px; padding:10px 8px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; text-align:center;}
+.toolBtn small{display:block; opacity:.8; margin-top:3px;}
+.toolBtn.active{background:rgba(255,214,107,.2); border-color:rgba(255,214,107,.65); box-shadow:inset 0 0 0 1px rgba(255,214,107,.4);}
+.actions{display:flex; gap:8px;}
+button{border:none; border-radius:12px; padding:10px 14px; background:#f1e5ae; color:#3b3218; font-weight:700; cursor:pointer;}
+button:hover{filter:brightness(1.04);}
+button:disabled{opacity:.55; cursor:default;}
+#quickInfo{position:absolute; left:14px; top:-28px; font-size:12px; color:rgba(255,255,255,.85);}
+#rightPanel{position:absolute; right:16px; top:112px; bottom:16px; width:228px; z-index:20; padding:12px; overflow:auto;}
+#rightPanel.compact{scrollbar-width:thin;}
+.panelTitle{font-weight:800; margin-bottom:8px;}
+.divider{height:1px; background:rgba(255,255,255,.12); margin:12px 0;}
+.itemRow{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; padding:5px 0;}
+#message{position:absolute; left:50%; top:90px; transform:translateX(-50%); z-index:35; padding:10px 14px; border-radius:12px; background:rgba(35,54,35,0.88); border:1px solid rgba(255,255,255,.12); opacity:0; pointer-events:none; transition:opacity .25s;}
+#message.show{opacity:1;}
+.modal{position:absolute; inset:0; z-index:50; background:rgba(10,12,18,.42); display:grid; place-items:center; padding:24px;}
+.modal.hidden{display:none;}
+.modalCard{width:min(980px, calc(100vw - 32px)); max-height:calc(100vh - 48px); overflow:auto; padding:18px;}
+.modalHeader{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:10px;}
+.modalHeader .title{font-size:22px; font-weight:800;}
+.modalHeader .sub{font-size:12px; color:var(--muted); margin-top:4px;}
+.closeBtn{background:#dcd4be;}
+.shopGrid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.list{display:flex; flex-direction:column; gap:8px;}
+.shopItem{display:flex; justify-content:space-between; gap:12px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.10);}
+.shopItem .name{font-weight:800;}
+.shopItem .desc{font-size:12px; color:var(--muted); margin-top:2px;}
+.shopItem .meta{font-size:12px; margin-top:2px; color:#ffefb0;}
+.shopItem button{padding:8px 12px; white-space:nowrap;}
+@media (max-width: 980px){
+  #hudBottom{right:16px; bottom:16px; flex-direction:column; align-items:stretch;}
+  #rightPanel{top:auto; bottom:148px; height:190px; left:16px; width:auto; right:16px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  .divider{display:none;}
+}
+@media (max-width: 720px){
+  #hudTop{flex-direction:column; align-items:stretch;}
+  .stats{justify-content:flex-start;}
+  #rightPanel{grid-template-columns:1fr; bottom:182px; height:180px;}
+  .actions{display:grid; grid-template-columns:1fr 1fr 1fr;}
+  #quickInfo{display:none;}
+  .shopGrid{grid-template-columns:1fr;}
+  .toolBtn{min-width:72px;}
+}
+
+</style>
 </head>
 <body>
-<div id="app">
-  <header class="topbar">
-    <div class="brand"><span class="brandicon">◈</span><div><b>DEEP <em>SALVAGE</em></b><small>심해 인양 계약 <span class="beta">v1.0</span></small></div></div>
-    <div class="metrics">
-      <div class="metric"><span>계약</span><b id="dayStat">01 / 05</b></div>
-      <div class="metric"><span>남은 시간</span><b id="timerStat">1:20</b></div>
-      <div class="metric gold"><span>보유 크레딧</span><b id="walletStat">0</b></div>
-    </div>
-    <div class="top-actions"><button id="audioBtn" class="icon-btn" aria-label="사운드 켜기/끄기" title="사운드 켜기/끄기">♪</button><button id="pauseBtn" class="icon-btn" aria-label="일시정지" title="일시정지 / P">Ⅱ</button></div>
-  </header>
-  <main id="arena" class="arena">
-    <canvas id="gameCanvas" aria-label="심해 인양 플레이 화면"></canvas>
-    <div class="top-overlay">
-      <div class="contract-card">
-        <div class="contract-heading"><div><span class="eyebrow">TODAY'S CONTRACT</span><strong id="contractName">침몰한 잔해</strong></div><div class="target" id="targetStat">0 / 320</div></div>
-        <div class="progress"><span id="quotaProgress"></span></div>
-        <div class="info-row"><span id="contractHint">획득한 화물을 선상으로 끌어올리세요</span><span id="depthStat">깊이 0m</span></div>
+  <div id="app">
+    <canvas id="game"></canvas>
+
+    <div id="hudTop" class="hud glass">
+      <div class="brand">
+        <div class="title">빚쟁이 농부</div>
+        <div class="sub">농사로 빚을 갚고, 나중엔 자동화를 만든다</div>
       </div>
-      <div class="cargo-card"><div class="cargo-top"><span>인양 화물</span><b id="cargoStat">0 / 6.0t</b></div><div class="progress cargo-progress"><span id="cargoProgress"></span></div><div class="cargo-bottom" id="cargoValue">예상 수익 +0</div></div>
+      <div class="stats">
+        <div class="pill"><span>현금</span><strong id="gold">0G</strong></div>
+        <div class="pill debt"><span>빚</span><strong id="debt">0G</strong></div>
+        <div class="pill"><span>날짜</span><strong id="day">Day 1</strong></div>
+        <div class="pill"><span>시간</span><strong id="clock">06:00</strong></div>
+      </div>
     </div>
-    <div id="toast" class="toast" aria-live="polite"></div>
-    <div id="haulMessage" class="haul-message" aria-hidden="true"></div>
-    <div class="depth-label"><span class="depth-line"></span><span id="zoneLabel">연안 수역</span></div>
-    <div class="control-hint"><span class="mouse-icon">↧</span><span id="controlHint">원하는 위치를 누르고 있으면 하강 · 놓으면 인양</span></div>
-    <div class="legend"><span class="legend-gold">◆</span> 보물 &nbsp; <span class="legend-red">✖</span> 위험물</div>
-    <div id="modal" class="modal" aria-live="polite"><div id="modalContent" class="modal-inner"></div></div>
-  </main>
-  <footer class="upgradebar">
-    <div class="bar-heading"><span>LIVE UPGRADES</span><small>인양 수익으로 즉시 강화</small></div>
-    <button class="upgrade-btn" data-upgrade="speed"><span class="upgrade-ic">⚙</span><span class="upgrade-body"><b>모터 강화 <i id="speedLv">Lv.0</i></b><small>하강·인양 속도</small></span><strong id="speedCost">85</strong></button>
-    <button class="upgrade-btn" data-upgrade="capacity"><span class="upgrade-ic">▣</span><span class="upgrade-body"><b>화물 용량 <i id="capacityLv">Lv.0</i></b><small>더 많은 보물 수집</small></span><strong id="capacityCost">115</strong></button>
-    <button class="upgrade-btn" data-upgrade="luck"><span class="upgrade-ic">✦</span><span class="upgrade-body"><b>탐지 장치 <i id="luckLv">Lv.0</i></b><small>고가 보물 발견</small></span><strong id="luckCost">140</strong></button>
-  </footer>
-</div>
-<script src="game.js?v=1"></script>
+
+    <div id="hudBottom" class="glass">
+      <div id="hotbar"></div>
+      <div class="actions">
+        <button id="shopBtn">상점 / 업그레이드</button>
+        <button id="sellBtn">수확물 판매</button>
+        <button id="payDebtBtn">빚 500G 갚기</button>
+        <button id="sleepBtn">다음 날로</button>
+      </div>
+      <div id="quickInfo">WASD 이동 · 마우스로 타일 선택 · 1~6 도구 변경</div>
+    </div>
+
+    <div id="rightPanel" class="glass compact">
+      <div class="panelTitle">보관함</div>
+      <div id="inventory"></div>
+      <div class="divider"></div>
+      <div class="panelTitle">자동화</div>
+      <div id="automationInfo"></div>
+      <div class="divider"></div>
+      <div class="panelTitle">오늘 목표</div>
+      <div id="goals">- 빚을 갚고 농장을 키우자</div>
+    </div>
+
+    <div id="message"></div>
+
+    <div id="shopModal" class="modal hidden">
+      <div class="modalCard glass">
+        <div class="modalHeader">
+          <div>
+            <div class="title">농장 상점</div>
+            <div class="sub">씨앗, 확장, 자동화를 구매할 수 있어</div>
+          </div>
+          <button class="closeBtn" data-close="shopModal">닫기</button>
+        </div>
+        <div class="shopGrid">
+          <div>
+            <h3>씨앗</h3>
+            <div id="seedShop" class="list"></div>
+            <h3>도구 업그레이드</h3>
+            <div id="toolShop" class="list"></div>
+          </div>
+          <div>
+            <h3>농장 확장</h3>
+            <div id="landShop" class="list"></div>
+            <h3>자동화</h3>
+            <div id="automationShop" class="list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(()=>{
+'use strict';
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const $ = id => document.getElementById(id);
+const ui = {
+  gold:$('gold'), debt:$('debt'), day:$('day'), clock:$('clock'), hotbar:$('hotbar'), inventory:$('inventory'), automationInfo:$('automationInfo'),
+  goals:$('goals'), shopBtn:$('shopBtn'), payDebtBtn:$('payDebtBtn'), sleepBtn:$('sleepBtn'), sellBtn:$('sellBtn'), shopModal:$('shopModal'), message:$('message'),
+  seedShop:$('seedShop'), toolShop:$('toolShop'), landShop:$('landShop'), automationShop:$('automationShop')
+};
+
+const TILE=32, MAP_W=96, MAP_H=96;
+const STATE_KEY='debt_farmer_proto_v1';
+const colors={grass:'#86c96d',grass2:'#79bb64',dirt:'#96714b',tilled:'#704d31',wet:'#5f8fc8',path:'#d7c09d',water:'#68b7dc'};
+const seedDefs={
+  turnip:{name:'순무', buy:18, sell:42, grow:45, stages:3, color:'#e6e2d5', leaf:'#6ac56c'},
+  potato:{name:'감자', buy:30, sell:76, grow:72, stages:4, color:'#b8945a', leaf:'#6ca157'},
+  blueberry:{name:'블루베리', buy:80, sell:145, grow:110, stages:4, color:'#3e57d9', leaf:'#5baf62'}
+};
+const automationDefs={
+  sprinkler:{name:'스프링클러', cost:360, desc:'3x3 범위 자동 물주기', placeTool:'sprinkler'},
+  seeder:{name:'자동 파종기', cost:560, desc:'주변 빈 밭에 순무 자동 파종', placeTool:'seeder'},
+  harvester:{name:'수확 드론', cost:980, desc:'주변 익은 작물 자동 수확/판매', placeTool:'harvester'}
+};
+const landDefs=[
+  {id:'east', name:'동쪽 밭 확장', cost:700, rect:[58,30,22,20]},
+  {id:'south', name:'남쪽 초원 확장', cost:1300, rect:[30,58,28,22]},
+  {id:'west', name:'서쪽 과수원 부지', cost:2200, rect:[10,24,18,24]},
+  {id:'farSouth', name:'남부 대농장', cost:4200, rect:[20,78,42,14]},
+];
+const toolDefs=[
+  {id:'hoe', label:'괭이', tip:'땅을 일군다', key:'1'},
+  {id:'water', label:'물뿌리개', tip:'작물에 물을 준다', key:'2'},
+  {id:'turnip', label:'순무씨', tip:'빠르게 자라는 작물', key:'3'},
+  {id:'potato', label:'감자씨', tip:'안정적인 작물', key:'4'},
+  {id:'blueberry', label:'블루베리씨', tip:'고수익 작물', key:'5'},
+  {id:'harvest', label:'수확', tip:'익은 작물을 수확한다', key:'6'},
+];
+
+let game = null;
+let lastTime = 0;
+let keys = {};
+let mouse={x:0,y:0,down:false,clicked:false};
+let activeTool='hoe';
+let toastTimer=0;
+let hudElapsed=0;
+
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function dist(ax,ay,bx,by){return Math.hypot(ax-bx, ay-by);}
+function fmt(n){return `${Math.floor(n).toLocaleString()}G`;}
+function showMsg(t){ ui.message.textContent=t; ui.message.classList.add('show'); toastTimer=2.0; }
+
+function makeTile(x,y){
+  const cx=MAP_W/2, cy=MAP_H/2;
+  const d=dist(x,y,cx,cy);
+  let tile={ground:'grass', tilled:false, watered:false, crop:null, blocked:false, deco:null, structure:null, unlocked:d<18};
+  if(x>70 && y<18){ tile.ground='water'; tile.blocked=true; tile.unlocked=true; }
+  if(tile.unlocked && Math.random()<0.075 && tile.ground==='grass'){ tile.deco=Math.random()<0.55?'weed':'flower'; }
+  if(!tile.unlocked){
+    if(Math.random()<0.19){ tile.blocked=true; tile.deco=Math.random()<0.5?'tree':'rock'; }
+    else if(Math.random()<0.08){ tile.deco='weed'; }
+  }
+  return tile;
+}
+function newGame(){
+  const tiles=[];
+  for(let y=0;y<MAP_H;y++){
+    const row=[];
+    for(let x=0;x<MAP_W;x++) row.push(makeTile(x,y));
+    tiles.push(row);
+  }
+  // farmhouse and path
+  for(let y=45;y<=50;y++) for(let x=45;x<=50;x++){ tiles[y][x].ground='path'; tiles[y][x].unlocked=true; tiles[y][x].blocked=false; tiles[y][x].deco=null; }
+  for(let y=43;y<=52;y++) for(let x=40;x<=55;x++){ tiles[y][x].unlocked=true; }
+  for(let x=47;x<=48;x++) for(let y=34;y<=44;y++){ tiles[y][x].ground='path'; tiles[y][x].unlocked=true; tiles[y][x].blocked=false; }
+  // initial clear area
+  for(let y=34;y<58;y++) for(let x=34;x<58;x++){ let t=tiles[y][x]; t.unlocked=true; if(t.ground!=='water'){ t.blocked=false; t.deco=null; }}
+  for(let y=41;y<=44;y++) for(let x=45;x<=50;x++){ tiles[y][x].blocked=true; tiles[y][x].tilled=false; tiles[y][x].ground='path'; }
+  return {
+    cam:{x:0,y:0,scale:1},
+    player:{x:47.5,y:47.5,speed:5.2},
+    gold:260,
+    debt:6500,
+    day:1,
+    time:6*60,
+    toolPower:1,
+    waterPower:1,
+    bag:{turnipSeed:8,potatoSeed:0,blueberrySeed:0},
+    produce:{turnip:0,potato:0,blueberry:0},
+    tiles,
+    automation:{sprinkler:0,seeder:0,harvester:0},
+    structures:[],
+    ownedLand:{},
+    particles:[],
+    totalHarvests:0,
+    totalAutomationHarvests:0,
+    sleeping:false,
+    lastSave:0,
+  };
+}
+function save(){
+  try{localStorage.setItem(STATE_KEY, JSON.stringify(game));}
+  catch(e){/* private browsing or quota: continue playing without persistence */}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STATE_KEY);
+    if(!raw) return newGame();
+    const s=JSON.parse(raw);
+    // migrate if missing
+    s.particles=[];
+    s.cam=s.cam||{x:0,y:0,scale:1};
+    s.ownedLand=s.ownedLand||{};
+    s.automation=s.automation||{sprinkler:0,seeder:0,harvester:0};
+    s.bag=s.bag||{turnipSeed:8,potatoSeed:0,blueberrySeed:0};
+    s.produce=s.produce||{turnip:0,potato:0,blueberry:0};
+    return s;
+  }catch(e){ return newGame(); }
+}
+
+function resize(){
+  const dpr=Math.min(devicePixelRatio||1, 2);
+  canvas.width=Math.floor(innerWidth*dpr);
+  canvas.height=Math.floor(innerHeight*dpr);
+  canvas.style.width=innerWidth+'px';
+  canvas.style.height=innerHeight+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function setupUI(){
+  ui.shopBtn.onclick=()=>renderShop(true);
+  ui.payDebtBtn.onclick=()=>{
+    if(game.gold>=500 && game.debt>0){ game.gold-=500; game.debt=Math.max(0, game.debt-500); showMsg('빚 500G를 상환했다.'); }
+    else showMsg('현금이 부족하거나 이미 빚을 다 갚았다.');
+    updateHUD(); save();
+  };
+  ui.sleepBtn.onclick=()=>nextDay();
+  ui.sellBtn.onclick=()=>{ const amount=autoShipProduce(); showMsg(amount>0?`수확물 판매: +${fmt(amount)}`:"판매할 작물이 없다."); updateHUD(); save(); };
+  document.querySelectorAll('[data-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.add('hidden'));
+  ui.hotbar.innerHTML='';
+  toolDefs.forEach(t=>{
+    const b=document.createElement('button'); b.className='toolBtn'; b.dataset.tool=t.id;
+    b.innerHTML=`<strong>${t.label}</strong><small>${t.key}</small>`;
+    b.onclick=()=>{activeTool=t.id; refreshHotbar();};
+    ui.hotbar.appendChild(b);
+  });
+  refreshHotbar();
+}
+function refreshHotbar(){
+  [...ui.hotbar.children].forEach(b=>b.classList.toggle('active', b.dataset.tool===activeTool));
+}
+function renderShop(open=false){
+  const makeItem=(name,desc,meta,price,enabled,fn)=>{
+    const row=document.createElement('div'); row.className='shopItem';
+    row.innerHTML=`<div><div class="name">${name}</div><div class="desc">${desc}</div><div class="meta">${meta}</div></div>`;
+    const btn=document.createElement('button'); btn.textContent=price; btn.disabled=!enabled; btn.onclick=fn; row.appendChild(btn); return row;
+  };
+  ui.seedShop.innerHTML='';
+  ui.seedShop.appendChild(makeItem('순무 씨앗 x5','빠르게 자라며 초반 수익에 좋다','가방에 5개 추가','90G',game.gold>=90,()=>{game.gold-=90; game.bag.turnipSeed+=5; renderShop(); showMsg('순무 씨앗을 샀다.');}));
+  ui.seedShop.appendChild(makeItem('감자 씨앗 x5','조금 느리지만 더 비싸게 팔린다','가방에 5개 추가','150G',game.gold>=150,()=>{game.gold-=150; game.bag.potatoSeed+=5; renderShop(); showMsg('감자 씨앗을 샀다.');}));
+  ui.seedShop.appendChild(makeItem('블루베리 씨앗 x5','후반 고수익 작물','가방에 5개 추가','400G',game.gold>=400,()=>{game.gold-=400; game.bag.blueberrySeed+=5; renderShop(); showMsg('블루베리 씨앗을 샀다.');}));
+
+  ui.toolShop.innerHTML='';
+  const toolUpgrades=[
+    {name:'괭이 범위 업그레이드', desc:'한 번에 더 넓은 범위 경작', meta:`현재 Lv.${game.toolPower}`, price: 320*game.toolPower, enabled:game.gold>=320*game.toolPower && game.toolPower<3, act:()=>{game.gold-=320*game.toolPower; game.toolPower++; renderShop(); showMsg('괭이 범위가 넓어졌다.');}},
+    {name:'물뿌리개 범위 업그레이드', desc:'한 번에 더 넓은 범위에 물주기', meta:`현재 Lv.${game.waterPower}`, price: 260*game.waterPower, enabled:game.gold>=260*game.waterPower && game.waterPower<3, act:()=>{game.gold-=260*game.waterPower; game.waterPower++; renderShop(); showMsg('물뿌리개가 강해졌다.');}},
+  ];
+  toolUpgrades.forEach(u=>ui.toolShop.appendChild(makeItem(u.name,u.desc,u.meta, u.enabled?fmt(u.price):u.price?fmt(u.price):'완료', u.enabled, u.act)));
+
+  ui.landShop.innerHTML='';
+  landDefs.forEach(l=>{
+    const owned=game.ownedLand[l.id];
+    ui.landShop.appendChild(makeItem(l.name,'새로운 대형 농지와 장식 구역을 개방한다', owned?'구매 완료':'넓은 부지를 개간 가능', owned?'완료':fmt(l.cost), !owned && game.gold>=l.cost, ()=>buyLand(l.id)));
+  });
+
+  ui.automationShop.innerHTML='';
+  Object.entries(automationDefs).forEach(([id,a])=>{
+    ui.automationShop.appendChild(makeItem(a.name,a.desc,`보유 ${game.automation[id]}개`, fmt(a.cost), game.gold>=a.cost, ()=>{game.gold-=a.cost; game.automation[id]++; activeTool=id; refreshHotbar(); renderShop(); showMsg(`${a.name} 설치 모드로 전환.`);}));
+  });
+  if(open) ui.shopModal.classList.remove('hidden');
+  updateHUD();
+}
+
+function buyLand(id){
+  const l=landDefs.find(v=>v.id===id); if(!l||game.ownedLand[id]||game.gold<l.cost) return;
+  game.gold-=l.cost; game.ownedLand[id]=true;
+  const [sx,sy,w,h]=l.rect;
+  for(let y=sy;y<sy+h;y++) for(let x=sx;x<sx+w;x++){
+    const t=game.tiles[y][x]; t.unlocked=true; if(t.ground!=='water'){ t.blocked=false; if(Math.random()<0.14)t.deco='weed'; else if(Math.random()<0.06)t.deco='flower'; else t.deco=null; }
+  }
+  showMsg(`${l.name} 부지를 개간했다!`);
+  renderShop();
+}
+
+function updateHUD(){
+  ui.gold.textContent=fmt(game.gold);
+  ui.debt.textContent=fmt(game.debt);
+  ui.day.textContent=`Day ${game.day}`;
+  const h=Math.floor(game.time/60)%24, m=Math.floor(game.time%60);
+  ui.clock.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  ui.inventory.innerHTML=`
+    <div class="itemRow"><span>순무 씨앗</span><strong>${game.bag.turnipSeed}</strong></div>
+    <div class="itemRow"><span>감자 씨앗</span><strong>${game.bag.potatoSeed}</strong></div>
+    <div class="itemRow"><span>블루베리 씨앗</span><strong>${game.bag.blueberrySeed}</strong></div>
+    <div class="itemRow"><span>순무</span><strong>${game.produce.turnip}</strong></div>
+    <div class="itemRow"><span>감자</span><strong>${game.produce.potato}</strong></div>
+    <div class="itemRow"><span>블루베리</span><strong>${game.produce.blueberry}</strong></div>`;
+  ui.automationInfo.innerHTML=`
+    <div class="itemRow"><span>스프링클러</span><strong>${game.automation.sprinkler}</strong></div>
+    <div class="itemRow"><span>자동 파종기</span><strong>${game.automation.seeder}</strong></div>
+    <div class="itemRow"><span>수확 드론</span><strong>${game.automation.harvester}</strong></div>
+    <div class="itemRow"><span>자동 수확량</span><strong>${game.totalAutomationHarvests}</strong></div>`;
+  const stage = game.debt>0 ? '초반 목표: 농사로 빚을 갚자' : '후반 목표: 자동화 농장을 완성하자';
+  ui.goals.innerHTML=`${stage}<br>총 수확량: ${game.totalHarvests}<br>다음 확장 비용을 모아보자.`;
+}
+
+function getTile(x,y){ if(x<0||y<0||x>=MAP_W||y>=MAP_H) return null; return game.tiles[y][x]; }
+function forArea(tx,ty,r,cb){ for(let y=ty-r;y<=ty+r;y++) for(let x=tx-r;x<=tx+r;x++) cb(x,y,getTile(x,y)); }
+
+function attemptAction(tx,ty){
+  const t=getTile(tx,ty); if(!t || !t.unlocked) return;
+  if(['sprinkler','seeder','harvester'].includes(activeTool)){
+    if(t.blocked || t.structure || t.ground==='water') return showMsg('설치할 수 없는 위치다.');
+    if(game.automation[activeTool]<=0) return showMsg('보유한 기계가 없다.');
+    t.structure=activeTool; game.structures.push({x:tx,y:ty,type:activeTool,timer:0}); game.automation[activeTool]--; showMsg('자동화 기계를 설치했다.'); updateHUD(); return;
+  }
+  const range = activeTool==='water' ? game.waterPower-1 : activeTool==='hoe' ? game.toolPower-1 : 0;
+  forArea(tx,ty,range,(x,y,tile)=>{
+    if(!tile || !tile.unlocked) return;
+    if(activeTool==='hoe'){
+      if(tile.ground==='grass' && !tile.blocked && !tile.crop && !tile.structure){ tile.tilled=true; tile.ground='dirt'; tile.deco=null; spawnParticles(x+0.5,y+0.5,'soil'); }
+    }else if(activeTool==='water'){
+      if(tile.tilled || tile.crop){ tile.watered=true; spawnParticles(x+0.5,y+0.5,'water'); }
+    }else if(activeTool==='harvest'){
+      harvestTile(x,y,tile,false);
+    }else{
+      const cropKey = activeTool;
+      const bagKey = cropKey+'Seed';
+      if(tile.tilled && !tile.crop && game.bag[bagKey]>0){
+        tile.crop={type:cropKey, age:0, watered:tile.watered, stage:0}; game.bag[bagKey]--; spawnParticles(x+0.5,y+0.5,'leaf');
+      }
+    }
+  });
+  updateHUD();
+}
+function harvestTile(x,y,tile,auto=false){
+  if(!tile?.crop) return;
+  const type=tile.crop.type, def=seedDefs[type];
+  if(tile.crop.age < def.grow) return;
+  tile.crop=null; tile.watered=false;
+  if(auto){ game.gold+=def.sell; } else { game.produce[type]++; }
+  game.totalHarvests++;
+  if(auto) game.totalAutomationHarvests++;
+  spawnParticles(x+0.5,y+0.4,'coin');
+}
+function spawnParticles(x,y,type){
+  const c = type==='coin' ? '#ffd66b' : type==='water' ? '#74b8ff' : type==='leaf' ? '#90dc78' : '#9f7d54';
+  for(let i=0;i<5;i++) game.particles.push({x,y,vx:(Math.random()-0.5)*0.04,vy:-Math.random()*0.06-0.02,life:0.6+Math.random()*0.3,color:c,size:3+Math.random()*3});
+}
+
+function update(dt){
+  if(toastTimer>0){ toastTimer-=dt; if(toastTimer<=0) ui.message.classList.remove('show'); }
+  // player movement
+  const p=game.player; let mx=0,my=0;
+  if(keys['w']||keys['arrowup']) my-=1; if(keys['s']||keys['arrowdown']) my+=1; if(keys['a']||keys['arrowleft']) mx-=1; if(keys['d']||keys['arrowright']) mx+=1;
+  const len=Math.hypot(mx,my)||1; mx/=len; my/=len;
+  let nx=p.x+mx*p.speed*dt, ny=p.y+my*p.speed*dt;
+  if(canWalk(nx,ny)) { p.x=nx; p.y=ny; }
+  game.cam.x += (p.x - game.cam.x) * Math.min(1,dt*5);
+  game.cam.y += (p.y - game.cam.y) * Math.min(1,dt*5);
+
+  // time and crop growth
+  game.time += dt*8;
+  if(game.time>=24*60) nextDay();
+  for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++){
+    const t=game.tiles[y][x];
+    if(t.crop && t.watered){ t.crop.age += dt; const def=seedDefs[t.crop.type]; t.crop.stage=Math.min(def.stages-1, Math.floor((t.crop.age/def.grow)*def.stages)); }
+  }
+  // automation
+  for(const s of game.structures){ s.timer += dt; if(s.type==='sprinkler' && s.timer>3){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>{ if(t && (t.tilled||t.crop)) t.watered=true; }); }
+    if(s.type==='seeder' && s.timer>4){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>{ if(t && t.tilled && !t.crop){ if(game.bag.turnipSeed===0 && game.gold>=seedDefs.turnip.buy) {game.gold-=seedDefs.turnip.buy; game.bag.turnipSeed++;} if(game.bag.turnipSeed>0){t.crop={type:'turnip', age:0, watered:t.watered, stage:0}; game.bag.turnipSeed--;}} }); }
+    if(s.type==='harvester' && s.timer>4.2){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>harvestTile(x,y,t,true)); }
+  }
+  // particles
+  game.particles=game.particles.filter(pt=>{ pt.life-=dt; pt.x+=pt.vx*60*dt; pt.y+=pt.vy*60*dt; pt.vy+=0.002; return pt.life>0; });
+
+  // auto-save
+  game.lastSave += dt; if(game.lastSave>5){ game.lastSave=0; save(); }
+  if(mouse.clicked){ handleClick(); mouse.clicked=false; }
+  hudElapsed+=dt; if(hudElapsed>0.25){hudElapsed=0; updateHUD();}
+}
+function canWalk(x,y){
+  const tx=Math.floor(x), ty=Math.floor(y), t=getTile(tx,ty); return !!t && t.unlocked && !t.blocked && t.ground!=='water' && !t.structure;
+}
+function nextDay(){
+  game.day++;
+  game.time=6*60;
+  const sold = autoShipProduce();
+  if(game.day%7===0 && game.debt>0){
+    const payment=Math.min(350, game.gold); game.gold -= payment; game.debt=Math.max(0, game.debt-payment); showMsg(`주간 자동 상환: ${fmt(payment)}`);
+  }else showMsg(`${game.day}일차 아침이 밝았다.`);
+  // reset watering, sprinkle morning start
+  for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++){ game.tiles[y][x].watered=false; }
+  for(const s of game.structures){ if(s.type==='sprinkler'){ forArea(s.x,s.y,1,(x,y,t)=>{ if(t && (t.tilled||t.crop)) t.watered=true;}); } }
+  if(sold>0) showMsg(`밤새 ${fmt(sold)} 수익이 정산되었다.`);
+  save();
+}
+function autoShipProduce(){
+  let total=0;
+  Object.entries(game.produce).forEach(([k,v])=>{ if(v>0){ total += v*seedDefs[k].sell; game.produce[k]=0; }});
+  game.gold += total; return total;
+}
+function handleClick(){
+  const rect=canvas.getBoundingClientRect();
+  const sx=mouse.x-rect.left, sy=mouse.y-rect.top;
+  const wx = sx/32 + game.cam.x - innerWidth/(2*TILE);
+  const wy = sy/32 + game.cam.y - innerHeight/(2*TILE);
+  const tx=Math.floor(wx), ty=Math.floor(wy);
+  if(dist(tx+0.5,ty+0.5, game.player.x, game.player.y) > 4.2) return showMsg('너무 멀다. 가까이 가자.');
+  attemptAction(tx,ty);
+}
+function draw(){
+  const w=innerWidth, h=innerHeight;
+  ctx.clearRect(0,0,w,h);
+  // sky tint
+  const daylight = 1 - Math.abs((game.time-12*60)/(12*60))*0.45;
+  ctx.fillStyle=`rgba(247,239,205,${0.15*daylight})`; ctx.fillRect(0,0,w,h);
+  const camX=game.cam.x - w/(2*TILE), camY=game.cam.y - h/(2*TILE);
+  const sx=Math.max(0,Math.floor(camX)-2), sy=Math.max(0,Math.floor(camY)-2), ex=Math.min(MAP_W,Math.ceil(camX+w/TILE)+2), ey=Math.min(MAP_H,Math.ceil(camY+h/TILE)+2);
+  // tiles
+  for(let y=sy;y<ey;y++) for(let x=sx;x<ex;x++) drawTile(x,y,camX,camY);
+  drawFarmhouse(camX,camY);
+  // highlight hovered tile
+  const rect=canvas.getBoundingClientRect();
+  const tx=Math.floor(mouse.x/TILE + camX), ty=Math.floor(mouse.y/TILE + camY);
+  const hx=(tx-camX)*TILE, hy=(ty-camY)*TILE;
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.strokeRect(hx+1,hy+1,TILE-2,TILE-2);
+  // player
+  drawPlayer((game.player.x-camX)*TILE,(game.player.y-camY)*TILE);
+  // particles
+  for(const p of game.particles){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect((p.x-camX)*TILE,(p.y-camY)*TILE,p.size,p.size); ctx.globalAlpha=1; }
+  // day night overlay
+  const darkness= clamp(Math.abs(game.time-12*60)/(12*60),0,1)*0.35;
+  if(darkness>0.01){ ctx.fillStyle=`rgba(21,30,61,${darkness})`; ctx.fillRect(0,0,w,h); }
+}
+function drawFarmhouse(camX,camY){
+  const px=(45-camX)*TILE,py=(40-camY)*TILE;
+  ctx.save();
+  ctx.fillStyle='rgba(38,40,24,.20)';ctx.fillRect(px+5,py+115,184,13);
+  ctx.fillStyle='#f0d3a0';ctx.fillRect(px+16,py+50,160,72);
+  ctx.fillStyle='#b76b55';ctx.beginPath();ctx.moveTo(px+2,py+55);ctx.lineTo(px+95,py+5);ctx.lineTo(px+188,py+55);ctx.fill();
+  ctx.fillStyle='#8f4e42';ctx.fillRect(px+18,py+54,160,11);
+  ctx.fillStyle='#d6edf0';ctx.fillRect(px+39,py+75,30,27);ctx.fillRect(px+122,py+75,30,27);
+  ctx.fillStyle='#82583a';ctx.fillRect(px+82,py+81,31,41);
+  ctx.fillStyle='#f6de9c';ctx.fillRect(px+102,py+103,5,5);
+  ctx.fillStyle='#70553a';ctx.fillRect(px+163,py+10,20,24);
+  ctx.restore();
+}
+function drawTile(x,y,camX,camY){
+  const t=game.tiles[y][x]; const px=(x-camX)*TILE, py=(y-camY)*TILE;
+  if(t.ground==='water'){
+    ctx.fillStyle=colors.water; ctx.fillRect(px,py,TILE,TILE);
+    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(px+6,py+5,10,4); ctx.fillRect(px+18,py+15,8,3);
+    return;
+  }
+  ctx.fillStyle = (x+y)%2===0 ? colors.grass : colors.grass2; ctx.fillRect(px,py,TILE,TILE);
+  if(t.ground==='path'){ ctx.fillStyle=colors.path; ctx.fillRect(px,py,TILE,TILE); }
+  if(t.tilled){ ctx.fillStyle=t.watered?colors.wet:colors.tilled; ctx.fillRect(px+2,py+2,TILE-4,TILE-4); ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.strokeRect(px+4,py+4,TILE-8,TILE-8); }
+  if(t.deco==='tree'){ ctx.fillStyle='#6c4d2f'; ctx.fillRect(px+12,py+16,8,12); ctx.fillStyle='#3e8e46'; ctx.beginPath(); ctx.arc(px+16,py+13,11,0,Math.PI*2); ctx.fill(); }
+  if(t.deco==='rock'){ ctx.fillStyle='#8b8f95'; ctx.fillRect(px+8,py+12,14,12); }
+  if(t.deco==='weed'){ ctx.fillStyle='#4da64e'; for(let i=0;i<3;i++)ctx.fillRect(px+10+i*4,py+18-rand(0,4),2,7+rand(0,3)); }
+  if(t.deco==='flower'){ ctx.fillStyle='#ffe39b'; ctx.fillRect(px+13,py+15,6,6); ctx.fillStyle='#55b456'; ctx.fillRect(px+15,py+19,2,4); }
+  if(t.crop){ drawCrop(t.crop,px,py); }
+  if(t.structure){ drawStructure(t.structure,px,py); }
+  if(!t.unlocked){ ctx.fillStyle='rgba(20,32,16,.4)'; ctx.fillRect(px,py,TILE,TILE); }
+}
+function drawCrop(c,px,py){
+  const def=seedDefs[c.type];
+  if(c.stage===0){ ctx.fillStyle='#5a3c28'; ctx.fillRect(px+14,py+16,4,3); return; }
+  ctx.fillStyle=def.leaf; ctx.fillRect(px+11,py+14,10,8);
+  if(c.stage>=2){ ctx.fillStyle=def.color; ctx.fillRect(px+12,py+10,8,8); }
+  if(c.stage>=3){ ctx.fillStyle=def.color; ctx.fillRect(px+9,py+8,14,12); }
+}
+function drawStructure(type,px,py){
+  if(type==='sprinkler'){ ctx.fillStyle='#9db6c5'; ctx.fillRect(px+12,py+8,8,16); ctx.fillStyle='#c9deea'; ctx.fillRect(px+7,py+8,18,4); }
+  if(type==='seeder'){ ctx.fillStyle='#bb8d49'; ctx.fillRect(px+8,py+12,16,10); ctx.fillStyle='#64503c'; ctx.fillRect(px+11,py+9,10,4); }
+  if(type==='harvester'){ ctx.fillStyle='#7f8ea9'; ctx.fillRect(px+7,py+9,18,14); ctx.fillStyle='#f1d078'; ctx.fillRect(px+12,py+12,8,6); }
+}
+function drawPlayer(px,py){
+  ctx.fillStyle='#5c3b28'; ctx.fillRect(px-5,py+4,10,10); // body
+  ctx.fillStyle='#335ed6'; ctx.fillRect(px-5,py+2,10,7);
+  ctx.fillStyle='#f6d8b5'; ctx.fillRect(px-4,py-7,8,8);
+  ctx.fillStyle='#8b5a2b'; ctx.fillRect(px-5,py-10,10,5);
+}
+
+function bind(){
+  addEventListener('resize', resize);
+  addEventListener('keydown',e=>{
+    keys[e.key.toLowerCase()]=true;
+    if(e.key>='1'&&e.key<='6'){ activeTool=toolDefs[Number(e.key)-1].id; refreshHotbar(); }
+    if(e.key.toLowerCase()==='q'){ renderShop(true); }
+    if(e.key.toLowerCase()==='e'){ nextDay(); }
+    if(e.key==='Escape') ui.shopModal.classList.add('hidden');
+  });
+  addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+  canvas.addEventListener('mousemove',e=>{ mouse.x=e.clientX; mouse.y=e.clientY;});
+  canvas.addEventListener('mousedown',e=>{ mouse.down=true; mouse.x=e.clientX; mouse.y=e.clientY; mouse.clicked=true;});
+  canvas.addEventListener('mouseup',()=>mouse.down=false);
+  canvas.addEventListener('touchstart',e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY; mouse.clicked=true; }, {passive:true});
+}
+
+function frame(ts){
+  const dt=Math.min(0.033,(ts-lastTime)/1000||0.016); lastTime=ts;
+  update(dt); draw(); requestAnimationFrame(frame);
+}
+
+function init(){
+  game=load(); resize(); setupUI(); bind(); renderShop(false); updateHUD(); requestAnimationFrame(frame); showMsg('작은 농장에서 시작해 빚을 갚고 자동화를 구축해 보자.');
+}
+init();
+})();
+
+</script>
 </body>
 </html>
