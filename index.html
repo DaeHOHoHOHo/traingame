@@ -1,575 +1,317 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>빚쟁이 농부</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+  <meta name="theme-color" content="#243e36">
+  <title>빚쟁이 농부 | Debt Farmer</title>
   <style>
-:root{
-  --bg:#8ccf8a;
-  --bg2:#76b977;
-  --panel:rgba(35,54,35,0.78);
-  --stroke:rgba(255,255,255,0.16);
-  --text:#f6f2df;
-  --muted:#cde6c7;
-  --accent:#ffd66b;
-  --green:#8fe46a;
-  --red:#ff8a8a;
-  --shadow:0 12px 32px rgba(0,0,0,.26);
-}
-*{box-sizing:border-box; user-select:none; -webkit-user-select:none;}
-html,body{margin:0; width:100%; height:100%; overflow:hidden; background:linear-gradient(#95d898,#72b977); font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--text);} 
-#app{position:relative; width:100vw; height:100vh; overflow:hidden;}
-#game{position:absolute; inset:0; width:100%; height:100%; image-rendering:pixelated; image-rendering:crisp-edges;}
-.glass{background:var(--panel); border:1px solid var(--stroke); border-radius:16px; backdrop-filter: blur(6px); box-shadow:var(--shadow);}
-.hud{position:absolute; left:16px; right:16px; padding:10px 14px; z-index:20;}
-#hudTop{top:16px; display:flex; justify-content:space-between; align-items:center; gap:12px;}
-.brand .title{font-size:22px; font-weight:800; line-height:1;}
-.brand .sub{font-size:12px; color:var(--muted); margin-top:4px;}
-.stats{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
-.pill{padding:8px 12px; border-radius:12px; background:rgba(255,255,255,0.08); min-width:88px; text-align:center;}
-.pill span{display:block; font-size:11px; color:var(--muted);}
-.pill strong{display:block; font-size:16px; margin-top:2px;}
-.pill.debt strong{color:#ffdb84;}
-#hudBottom{position:absolute; left:16px; right:260px; bottom:16px; z-index:20; padding:12px; display:flex; align-items:center; gap:12px;}
-#hotbar{display:flex; gap:8px; flex:1; overflow:auto hidden; scrollbar-width:none;}
-#hotbar::-webkit-scrollbar{display:none;}
-.toolBtn{min-width:80px; padding:10px 8px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; text-align:center;}
-.toolBtn small{display:block; opacity:.8; margin-top:3px;}
-.toolBtn.active{background:rgba(255,214,107,.2); border-color:rgba(255,214,107,.65); box-shadow:inset 0 0 0 1px rgba(255,214,107,.4);}
-.actions{display:flex; gap:8px;}
-button{border:none; border-radius:12px; padding:10px 14px; background:#f1e5ae; color:#3b3218; font-weight:700; cursor:pointer;}
-button:hover{filter:brightness(1.04);}
-button:disabled{opacity:.55; cursor:default;}
-#quickInfo{position:absolute; left:14px; top:-28px; font-size:12px; color:rgba(255,255,255,.85);}
-#rightPanel{position:absolute; right:16px; top:112px; bottom:16px; width:228px; z-index:20; padding:12px; overflow:auto;}
-#rightPanel.compact{scrollbar-width:thin;}
-.panelTitle{font-weight:800; margin-bottom:8px;}
-.divider{height:1px; background:rgba(255,255,255,.12); margin:12px 0;}
-.itemRow{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:14px; padding:5px 0;}
-#message{position:absolute; left:50%; top:90px; transform:translateX(-50%); z-index:35; padding:10px 14px; border-radius:12px; background:rgba(35,54,35,0.88); border:1px solid rgba(255,255,255,.12); opacity:0; pointer-events:none; transition:opacity .25s;}
-#message.show{opacity:1;}
-.modal{position:absolute; inset:0; z-index:50; background:rgba(10,12,18,.42); display:grid; place-items:center; padding:24px;}
-.modal.hidden{display:none;}
-.modalCard{width:min(980px, calc(100vw - 32px)); max-height:calc(100vh - 48px); overflow:auto; padding:18px;}
-.modalHeader{display:flex; justify-content:space-between; gap:12px; align-items:flex-start; margin-bottom:10px;}
-.modalHeader .title{font-size:22px; font-weight:800;}
-.modalHeader .sub{font-size:12px; color:var(--muted); margin-top:4px;}
-.closeBtn{background:#dcd4be;}
-.shopGrid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
-.list{display:flex; flex-direction:column; gap:8px;}
-.shopItem{display:flex; justify-content:space-between; gap:12px; align-items:center; padding:10px; border-radius:12px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.10);}
-.shopItem .name{font-weight:800;}
-.shopItem .desc{font-size:12px; color:var(--muted); margin-top:2px;}
-.shopItem .meta{font-size:12px; margin-top:2px; color:#ffefb0;}
-.shopItem button{padding:8px 12px; white-space:nowrap;}
-@media (max-width: 980px){
-  #hudBottom{right:16px; bottom:16px; flex-direction:column; align-items:stretch;}
-  #rightPanel{top:auto; bottom:148px; height:190px; left:16px; width:auto; right:16px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
-  .divider{display:none;}
-}
-@media (max-width: 720px){
-  #hudTop{flex-direction:column; align-items:stretch;}
-  .stats{justify-content:flex-start;}
-  #rightPanel{grid-template-columns:1fr; bottom:182px; height:180px;}
-  .actions{display:grid; grid-template-columns:1fr 1fr 1fr;}
-  #quickInfo{display:none;}
-  .shopGrid{grid-template-columns:1fr;}
-  .toolBtn{min-width:72px;}
-}
+:root{--cream:#f9f1db;--ink:#453d2f;--muted:#756c5c;--gold:#b0752d;--paper:#f6ead0;--border:#d4b98e;--green:#496b4b;--shadow:0 5px 0 rgba(43,50,31,.25),0 15px 36px rgba(29,37,22,.16)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#89bd73;color:var(--ink);font-family:'Gowun Dodum','Malgun Gothic',sans-serif}button{font:inherit;cursor:pointer;touch-action:manipulation}button:disabled{opacity:.45;cursor:not-allowed}#app{position:relative;width:100vw;height:100dvh;overflow:hidden;isolation:isolate}#world{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;image-rendering:pixelated;background:#8abb78}
+.topHud{position:absolute;z-index:3;top:14px;left:16px;right:16px;height:70px;display:flex;align-items:center;gap:18px;padding:10px 14px;background:var(--cream);border:3px solid #fdf9e9;border-bottom-color:#ae936c;border-radius:15px;box-shadow:var(--shadow)}.farmName{display:flex;align-items:center;gap:10px;min-width:200px}.farmName b{font-weight:900;font-size:18px;letter-spacing:-.05em;white-space:nowrap}.farmName small{display:block;font-size:10px;color:#8c785f;letter-spacing:.01em}.leafMark{width:38px;height:38px;display:grid;place-items:center;color:#fff8d9;font-size:30px;background:#6d9761;border:3px solid #477850;border-radius:12px;line-height:1}.topStats{display:flex;justify-content:flex-end;gap:0;flex:1;min-width:0}.stat{min-width:110px;padding:0 17px;border-left:1px solid #ddc9a8}.stat small{font-size:10px;color:#917960;display:block}.stat b{font-size:16px;font-weight:900;white-space:nowrap}.stat .gold{color:#a96a27}.smallBtn{background:#ebd9af;border:2px solid #d5bd8f;min-width:36px;height:36px;border-radius:9px;font-size:17px;color:#67523c}
+.sideInfo{position:absolute;z-index:2;top:97px;right:16px;width:241px;bottom:111px;background:rgba(251,240,211,.96);border:3px solid #fff7df;border-bottom-color:#c5a87b;box-shadow:var(--shadow);border-radius:16px;padding:13px 13px 16px;overflow:auto;scrollbar-width:thin;scrollbar-color:#cfb487 transparent}.sideTitle{font-size:17px;font-weight:900;display:flex;align-items:center;gap:6px;margin-bottom:9px}.sideTitle span{color:#c99149}.iconBtn{margin-left:auto;padding:1px 6px;background:transparent;border:0;color:#7a654b}.sideInfo section{padding:11px 0 12px;border-top:2px dashed rgba(178,149,104,.45)}.subTitle{font-weight:900;font-size:12px;color:#5b6943;margin-bottom:6px}.kvList{display:grid;gap:5px}.kv{font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}.kv span:first-child{color:#5a503e}.kv strong{color:#755431}.miniAction{margin-top:10px;border:0;border-radius:8px;background:#63885d;color:#fff8e5;width:100%;padding:9px;font-weight:900;font-size:12px;display:flex;justify-content:space-between}.miniAction:hover{background:#456d43}.sideParagraph{font-size:12px;color:#74664e;line-height:1.6}.goalBar{height:7px;border-radius:10px;background:#e4d3b1;overflow:hidden;margin:5px 0 8px}.goalBar>div{height:100%;background:#85ae6a;border-radius:10px}
+.cameraTools{position:absolute;z-index:2;left:16px;top:99px;display:flex;gap:5px}.cameraTools button{background:#f5e8c9;border:2px solid #fff9e5;border-bottom-color:#c7aa7b;border-radius:9px;width:36px;height:36px;font-size:19px;color:#665138;box-shadow:0 3px 0 #9b8464}.cameraTools button:active{transform:translateY(2px);box-shadow:0 1px 0 #9b8464}
+.mapHint{position:absolute;z-index:2;bottom:112px;left:20px;background:rgba(43,57,34,.72);color:#fff9e6;border:1px solid rgba(255,255,255,.18);font-size:11px;letter-spacing:-.02em;padding:6px 10px;border-radius:8px;pointer-events:none}.hintToast{z-index:10;position:absolute;left:50%;top:100px;transform:translateX(-50%) translateY(-8px);max-width:80vw;padding:10px 16px;background:#fbf0cf;color:#65492c;border:3px solid #fff9e7;border-radius:10px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:all .16s;font-size:14px;font-weight:900;text-align:center}.hintToast.show{opacity:1;transform:translateX(-50%)}
+.dock{position:absolute;z-index:3;bottom:12px;left:16px;right:16px;min-height:88px;display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:17px;background:rgba(250,239,213,.98);border:3px solid #fff9e7;border-bottom-color:#bc9c69;box-shadow:var(--shadow)}.toolstrip{display:flex;flex:1;gap:6px;overflow:auto hidden;scrollbar-width:thin;padding-bottom:3px}.tool{position:relative;min-width:62px;max-width:72px;flex:1;min-height:60px;background:#f3e6c7;border:2px solid #dcc59e;border-bottom:4px solid #bd9f70;border-radius:11px;color:#514730;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;padding:4px 3px;transition:transform .12s}.tool:active{transform:translateY(1px)}.tool.active{background:#e0efbf;border-color:#8bb371;border-bottom-color:#63965e}.tool .emoji{font-size:22px;line-height:1}.tool .toolname{font-size:10px;font-weight:900;white-space:nowrap}.tool .shortcut{position:absolute;right:3px;top:1px;font-size:9px;opacity:.55}.tool .count{position:absolute;left:4px;top:1px;font-size:9px;color:#917034}.dockActions{display:flex;gap:6px;border-left:2px dashed #d6c09a;padding-left:11px}.dockActions button{border:2px solid #bfa37b;border-radius:10px;padding:12px 11px;min-height:55px;background:#f5e8ce;color:#594530;font-size:13px;font-weight:900;white-space:nowrap}.dockActions .actionShop{background:#f6d992}.dockActions .actionDay{background:#719a66;color:#fffcec;border-color:#5a8053}.dockActions button span{font-size:15px}
+.modal{position:absolute;z-index:20;inset:0;display:grid;place-items:center;padding:14px}.modal.hidden{display:none}.modalBackdrop{position:absolute;inset:0;background:rgba(24,36,26,.65);backdrop-filter:blur(3px)}.modalContent{position:relative;width:min(920px,100%);max-height:min(85vh,850px);display:flex;flex-direction:column;background:#f9eed6;border:5px solid #fff8e6;border-bottom-color:#a9875b;border-radius:18px;box-shadow:0 13px 0 rgba(26,37,21,.24),0 30px 80px rgba(0,0,0,.25);overflow:hidden}.modalHeader{padding:18px 22px 11px;display:flex;align-items:start;justify-content:space-between;border-bottom:2px dashed #dac9a6}.modalHeader small{font-size:11px;color:#877156}.modalHeader h2{font-size:23px;margin:0;letter-spacing:-.04em}.modalHeader button{border:2px solid #d4b998;background:#ede0c4;color:#6e5638;border-radius:8px;padding:7px 12px}.modalBody{padding:16px 20px 24px;overflow:auto;scrollbar-width:thin}.shopGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.shopTitle{font-size:16px;margin:10px 0 8px;font-weight:900;color:#56704b}.shopItem{padding:10px 12px;background:#fff9ea;border:2px solid #e8d5b1;border-radius:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;margin:8px 0}.shopName{font-size:13px;font-weight:900}.shopDesc{font-size:11px;color:#8f7c60;line-height:1.5}.shopItem button{background:#6e9a61;border:0;border-bottom:3px solid #50744a;color:#fff9e5;font-size:12px;border-radius:7px;padding:8px 11px;min-width:71px;font-weight:900;white-space:nowrap}.shopItem button:disabled{background:#c6bd9f;border-color:#a89d86}.shopLabel{font-size:11px;color:#967b52;margin:7px 0}.debtBox{text-align:center;padding:22px;background:#fff8e7;border:2px solid #e0ceaa;border-radius:14px}.debtBox strong{font-size:30px;color:#9c6247}.paymentButtons{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:13px}.paymentButtons button{padding:10px 17px;border:0;background:#6d925e;color:white;border-radius:9px;font-weight:900}.note{font-size:12px;color:#816c56;line-height:1.8}
+@media(max-width:1060px){.farmName{min-width:150px}.sideInfo{width:210px}.stat{padding:0 10px;min-width:88px}.dockActions button{padding:9px 8px}.tool{min-width:57px}}
+@media(max-width:720px){.topHud{left:8px;right:8px;top:7px;height:auto;min-height:66px;gap:8px;padding:8px;align-items:start;flex-wrap:wrap}.farmName{min-width:0;flex:1}.farmName b{font-size:14px}.farmName small{font-size:9px}.leafMark{width:31px;height:31px;font-size:22px}.topStats{order:3;flex-basis:100%;justify-content:space-between}.stat{padding:0 7px;min-width:0;flex:1}.stat:first-child{border-left:0}.stat b{font-size:13px}.stat small{font-size:9px}.smallBtn{height:30px;min-width:30px}.sideInfo{right:9px;top:127px;width:164px;bottom:111px;padding:8px;opacity:.94}.sideTitle{font-size:14px}.sideInfo section{padding:8px 0}.kv{font-size:10px}.subTitle{font-size:10px}.sideParagraph{font-size:10px}.cameraTools{top:130px;left:9px}.mapHint{display:none}.dock{bottom:6px;left:6px;right:6px;min-height:91px;padding:6px;flex-direction:column;gap:5px;align-items:stretch}.toolstrip{width:100%;gap:4px;overflow:auto hidden}.tool{min-width:54px;min-height:48px;gap:0}.tool .emoji{font-size:18px}.tool .toolname{font-size:9px}.dockActions{width:100%;border:0;padding:0;justify-content:space-between}.dockActions button{flex:1;min-height:29px;padding:5px 4px;font-size:11px}.modalContent{max-height:89dvh}.shopGrid{grid-template-columns:1fr}.modalHeader{padding:10px 14px}.modalBody{padding:12px}.hintToast{top:122px;font-size:12px}}
+@media(max-height:650px){.sideInfo{bottom:92px;top:96px}.dock{min-height:64px;padding:5px}.tool{min-height:45px}.cameraTools{top:100px}}
+.sideInfo.minimized{height:49px;bottom:auto;overflow:hidden}
+.sideInfo.minimized section{display:none}
 
 </style>
 </head>
 <body>
-  <div id="app">
-    <canvas id="game"></canvas>
-
-    <div id="hudTop" class="hud glass">
-      <div class="brand">
-        <div class="title">빚쟁이 농부</div>
-        <div class="sub">농사로 빚을 갚고, 나중엔 자동화를 만든다</div>
-      </div>
-      <div class="stats">
-        <div class="pill"><span>현금</span><strong id="gold">0G</strong></div>
-        <div class="pill debt"><span>빚</span><strong id="debt">0G</strong></div>
-        <div class="pill"><span>날짜</span><strong id="day">Day 1</strong></div>
-        <div class="pill"><span>시간</span><strong id="clock">06:00</strong></div>
-      </div>
+<main id="app">
+  <canvas id="world" aria-label="농장 지도"></canvas>
+  <header class="topHud">
+    <div class="farmName"><span class="leafMark">✿</span><div><b>빚쟁이 농부</b><small>달빛마을 작은 농장 · FARM STORY</small></div></div>
+    <div class="topStats">
+      <div class="stat"><small>소지금</small><b class="gold" id="gold">360 G</b></div>
+      <div class="stat"><small>남은 빚</small><b id="debt">6,500 G</b></div>
+      <div class="stat"><small>계절 / 날씨</small><b id="weather">봄 · 맑음</b></div>
+      <div class="stat"><small>농장 생활</small><b id="day">1일차</b></div>
     </div>
+    <button id="audioToggle" class="smallBtn" aria-label="소리 켜기 또는 끄기" title="사운드">♪</button>
+  </header>
 
-    <div id="hudBottom" class="glass">
-      <div id="hotbar"></div>
-      <div class="actions">
-        <button id="shopBtn">상점 / 업그레이드</button>
-        <button id="sellBtn">수확물 판매</button>
-        <button id="payDebtBtn">빚 500G 갚기</button>
-        <button id="sleepBtn">다음 날로</button>
-      </div>
-      <div id="quickInfo">WASD 이동 · 마우스로 타일 선택 · 1~6 도구 변경</div>
+  <aside class="sideInfo" id="sideInfo">
+    <div class="sideTitle"><span>✦</span> 농장 장부 <button class="iconBtn" id="sideToggle" title="장부 접기">⌃</button></div>
+    <section><div class="subTitle">씨앗 주머니</div><div id="seedSummary" class="kvList"></div></section>
+    <section><div class="subTitle">수확 창고</div><div id="produceSummary" class="kvList"></div><button id="sellBtn" class="miniAction">수확물 모두 판매 <span>➜</span></button></section>
+    <section><div class="subTitle">농장 성장</div><div id="progressInfo" class="sideParagraph"></div><div id="goalBars"></div></section>
+    <section><div class="subTitle">자동화 설비</div><div id="machineSummary" class="kvList"></div></section>
+  </aside>
+
+  <div class="cameraTools">
+    <button id="zoomIn" title="확대">＋</button><button id="zoomOut" title="축소">－</button><button id="homeCam" title="집으로 이동">⌂</button>
+  </div>
+  <div class="hintToast" id="toast" role="status"></div>
+  <div class="mapHint" id="mapHint">지도 드래그로 이동 · 스크롤 확대 · 클릭으로 작업 · Shift+드래그 연속 작업</div>
+
+  <footer class="dock">
+    <div class="toolstrip" id="toolstrip"></div>
+    <div class="dockActions">
+      <button id="shopBtn" class="actionShop">상점 <span>▸</span></button>
+      <button id="debtBtn">빚 상환</button>
+      <button id="nextDayBtn" class="actionDay">다음 날 <span>☀</span></button>
     </div>
+  </footer>
 
-    <div id="rightPanel" class="glass compact">
-      <div class="panelTitle">보관함</div>
-      <div id="inventory"></div>
-      <div class="divider"></div>
-      <div class="panelTitle">자동화</div>
-      <div id="automationInfo"></div>
-      <div class="divider"></div>
-      <div class="panelTitle">오늘 목표</div>
-      <div id="goals">- 빚을 갚고 농장을 키우자</div>
-    </div>
-
-    <div id="message"></div>
-
-    <div id="shopModal" class="modal hidden">
-      <div class="modalCard glass">
-        <div class="modalHeader">
-          <div>
-            <div class="title">농장 상점</div>
-            <div class="sub">씨앗, 확장, 자동화를 구매할 수 있어</div>
-          </div>
-          <button class="closeBtn" data-close="shopModal">닫기</button>
-        </div>
-        <div class="shopGrid">
-          <div>
-            <h3>씨앗</h3>
-            <div id="seedShop" class="list"></div>
-            <h3>도구 업그레이드</h3>
-            <div id="toolShop" class="list"></div>
-          </div>
-          <div>
-            <h3>농장 확장</h3>
-            <div id="landShop" class="list"></div>
-            <h3>자동화</h3>
-            <div id="automationShop" class="list"></div>
-          </div>
-        </div>
-      </div>
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modalBackdrop" data-close></div>
+    <div class="modalContent">
+      <div class="modalHeader"><div><small id="modalKicker">달빛마을 농업 협동조합</small><h2 id="modalTitle">상점</h2></div><button id="closeModal" aria-label="닫기">✕</button></div>
+      <div id="modalBody" class="modalBody"></div>
     </div>
   </div>
-
-  <script>
-(()=>{
-'use strict';
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const $ = id => document.getElementById(id);
-const ui = {
-  gold:$('gold'), debt:$('debt'), day:$('day'), clock:$('clock'), hotbar:$('hotbar'), inventory:$('inventory'), automationInfo:$('automationInfo'),
-  goals:$('goals'), shopBtn:$('shopBtn'), payDebtBtn:$('payDebtBtn'), sleepBtn:$('sleepBtn'), sellBtn:$('sellBtn'), shopModal:$('shopModal'), message:$('message'),
-  seedShop:$('seedShop'), toolShop:$('toolShop'), landShop:$('landShop'), automationShop:$('automationShop')
+</main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), canvas=$('world'), ctx=canvas.getContext('2d',{alpha:false});
+const S=96, T=32, KEY='debt_farmer_proto_v1';
+const CROPS={
+ turnip:{name:'순무',emoji:'🌱',cost:15,value:43,days:2,leaf:'#63a955',fruit:'#eee4d5',stem:'#488643',stage:4},
+ potato:{name:'감자',emoji:'🥔',cost:26,value:79,days:3,leaf:'#6d9c45',fruit:'#bc8751',stem:'#3c7441',stage:4},
+ strawberry:{name:'딸기',emoji:'🍓',cost:68,value:91,days:4,regrow:2,leaf:'#568d43',fruit:'#d94d50',stem:'#397c45',stage:5},
+ tomato:{name:'토마토',emoji:'🍅',cost:100,value:158,days:5,regrow:3,leaf:'#559548',fruit:'#e36b4b',stem:'#458343',stage:5},
+ pumpkin:{name:'호박',emoji:'🎃',cost:175,value:365,days:7,leaf:'#4d8f47',fruit:'#e4a044',stem:'#397143',stage:5},
+ blueberry:{name:'블루베리',emoji:'🫐',cost:110,value:205,days:5,regrow:3,leaf:'#619747',fruit:'#6871cb',stem:'#3d814c',stage:5}
 };
-
-const TILE=32, MAP_W=96, MAP_H=96;
-const STATE_KEY='debt_farmer_proto_v1';
-const colors={grass:'#86c96d',grass2:'#79bb64',dirt:'#96714b',tilled:'#704d31',wet:'#5f8fc8',path:'#d7c09d',water:'#68b7dc'};
-const seedDefs={
-  turnip:{name:'순무', buy:18, sell:42, grow:45, stages:3, color:'#e6e2d5', leaf:'#6ac56c'},
-  potato:{name:'감자', buy:30, sell:76, grow:72, stages:4, color:'#b8945a', leaf:'#6ca157'},
-  blueberry:{name:'블루베리', buy:80, sell:145, grow:110, stages:4, color:'#3e57d9', leaf:'#5baf62'}
-};
-const automationDefs={
-  sprinkler:{name:'스프링클러', cost:360, desc:'3x3 범위 자동 물주기', placeTool:'sprinkler'},
-  seeder:{name:'자동 파종기', cost:560, desc:'주변 빈 밭에 순무 자동 파종', placeTool:'seeder'},
-  harvester:{name:'수확 드론', cost:980, desc:'주변 익은 작물 자동 수확/판매', placeTool:'harvester'}
-};
-const landDefs=[
-  {id:'east', name:'동쪽 밭 확장', cost:700, rect:[58,30,22,20]},
-  {id:'south', name:'남쪽 초원 확장', cost:1300, rect:[30,58,28,22]},
-  {id:'west', name:'서쪽 과수원 부지', cost:2200, rect:[10,24,18,24]},
-  {id:'farSouth', name:'남부 대농장', cost:4200, rect:[20,78,42,14]},
+const TOOL_LIST=[
+ ['hoe','괭이','⛏','밭을 경작합니다'],['water','물주기','💧','작물의 성장 속도를 높입니다'],
+ ...Object.keys(CROPS).map(k=>[k,CROPS[k].name,CROPS[k].emoji,`${CROPS[k].name} 씨앗 심기`]),
+ ['harvest','수확','🧺','익은 작물 수확'],['clear','정리','🪓','잡초와 돌 정리']
 ];
-const toolDefs=[
-  {id:'hoe', label:'괭이', tip:'땅을 일군다', key:'1'},
-  {id:'water', label:'물뿌리개', tip:'작물에 물을 준다', key:'2'},
-  {id:'turnip', label:'순무씨', tip:'빠르게 자라는 작물', key:'3'},
-  {id:'potato', label:'감자씨', tip:'안정적인 작물', key:'4'},
-  {id:'blueberry', label:'블루베리씨', tip:'고수익 작물', key:'5'},
-  {id:'harvest', label:'수확', tip:'익은 작물을 수확한다', key:'6'},
+const LANDS=[
+ {id:'east',name:'동쪽 목초지',cost:850,rect:[67,29,22,34],desc:'넓은 초원과 꽃밭'},
+ {id:'west',name:'서쪽 숲',cost:1450,rect:[8,31,23,35],desc:'수목이 울창한 개간 부지'},
+ {id:'south',name:'남쪽 평원',cost:2850,rect:[24,65,47,23],desc:'대규모 노지 재배지'},
+ {id:'north',name:'북쪽 언덕',cost:4900,rect:[24,6,47,27],desc:'넓은 고지대 농업 단지'}
 ];
-
-let game = null;
-let lastTime = 0;
-let keys = {};
-let mouse={x:0,y:0,down:false,clicked:false};
-let activeTool='hoe';
-let toastTimer=0;
-let hudElapsed=0;
-
-function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function dist(ax,ay,bx,by){return Math.hypot(ax-bx, ay-by);}
-function fmt(n){return `${Math.floor(n).toLocaleString()}G`;}
-function showMsg(t){ ui.message.textContent=t; ui.message.classList.add('show'); toastTimer=2.0; }
-
-function makeTile(x,y){
-  const cx=MAP_W/2, cy=MAP_H/2;
-  const d=dist(x,y,cx,cy);
-  let tile={ground:'grass', tilled:false, watered:false, crop:null, blocked:false, deco:null, structure:null, unlocked:d<18};
-  if(x>70 && y<18){ tile.ground='water'; tile.blocked=true; tile.unlocked=true; }
-  if(tile.unlocked && Math.random()<0.075 && tile.ground==='grass'){ tile.deco=Math.random()<0.55?'weed':'flower'; }
-  if(!tile.unlocked){
-    if(Math.random()<0.19){ tile.blocked=true; tile.deco=Math.random()<0.5?'tree':'rock'; }
-    else if(Math.random()<0.08){ tile.deco='weed'; }
-  }
-  return tile;
+const MACHINES={
+ sprinkler:{name:'스프링클러',emoji:'💦',cost:520,desc:'반경 3칸 자동 관수',range:3},
+ seeder:{name:'자동 파종기',emoji:'🌾',cost:1700,desc:'반경 3칸에 순무 씨앗 심기',range:3},
+ harvester:{name:'수확 드론',emoji:'🚜',cost:2550,desc:'반경 3칸 자동 수확',range:3}
+};
+const MILESTONES=[
+ {at:10,text:'첫 수확 10개',reward:60},
+ {at:50,text:'누적 수확 50개',reward:250},
+ {at:180,text:'누적 수확 180개',reward:650},
+ {at:500,text:'누적 수확 500개',reward:1800}
+];
+let game,tool='hoe',pointer=new Map(),panMoved=false,panAnchor=null,hover=null,toastUntil=0,last=0,lastPaint=0,clockAcc=0,uiAcc=0,saveAcc=0,timeAcc=0,audioOn=false,audioCtx=null;
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const money=n=>Math.round(n).toLocaleString('ko-KR')+' G';
+const hash=(x,y,k=0)=>{let n=(Math.imul(x,374761393)+Math.imul(y,668265263)+Math.imul(k+11,1442695041))|0;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967295;};
+const tile=(x,y)=>game?.tiles?.[y]?.[x]||null;
+const putRect=(arr,x0,y0,w,h,fn)=>{for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++)if(x>=0&&y>=0&&x<S&&y<S)fn(arr[y][x],x,y);};
+function makeMap(){
+ const tiles=Array.from({length:S},(_,y)=>Array.from({length:S},(_,x)=>{
+  const v=hash(x,y);const inBase=x>=31&&x<=66&&y>=33&&y<=64;
+  let deco=v<.038?'tree':v<.071?'stone':v<.139?'bush':v<.175?'flower':v<.196?'grass':null;
+  const river=(x>77&&y<29)||(x>82&&y<37&&y>20);
+  return {ground:river?'water':'grass',unlocked:inBase||river,blocked:river||deco==='tree'||deco==='stone',deco,crop:null,tilled:false,watered:false,structure:null};
+ }));
+ // A winding compact path connects farmhouse, barn and crop plots.
+ putRect(tiles,31,51,36,3,t=>{t.ground='path';t.deco=null;t.blocked=false});
+ putRect(tiles,47,45,3,14,t=>{t.ground='path';t.deco=null;t.blocked=false});
+ putRect(tiles,34,38,10,11,t=>{t.deco=null;t.blocked=false});
+ putRect(tiles,51,36,13,12,t=>{t.deco=null;t.blocked=false});
+ // buildings footprint
+ putRect(tiles,44,44,7,6,t=>{t.ground='path';t.blocked=true;t.deco=null;t.tilled=false});
+ putRect(tiles,56,45,8,6,t=>{t.ground='path';t.blocked=true;t.deco=null});
+ putRect(tiles,32,55,8,7,t=>{t.deco=null;t.blocked=false;t.ground='grass'});
+ // pre-tilled starter plot
+ putRect(tiles,36,39,6,4,(t,x,y)=>{t.tilled=true;t.ground='grass';t.blocked=false;t.deco=null;t.watered=false;if((x+y)%5===0)t.crop={type:'turnip',progress:1,ready:false};});
+ return tiles;
 }
-function newGame(){
-  const tiles=[];
-  for(let y=0;y<MAP_H;y++){
-    const row=[];
-    for(let x=0;x<MAP_W;x++) row.push(makeTile(x,y));
-    tiles.push(row);
-  }
-  // farmhouse and path
-  for(let y=45;y<=50;y++) for(let x=45;x<=50;x++){ tiles[y][x].ground='path'; tiles[y][x].unlocked=true; tiles[y][x].blocked=false; tiles[y][x].deco=null; }
-  for(let y=43;y<=52;y++) for(let x=40;x<=55;x++){ tiles[y][x].unlocked=true; }
-  for(let x=47;x<=48;x++) for(let y=34;y<=44;y++){ tiles[y][x].ground='path'; tiles[y][x].unlocked=true; tiles[y][x].blocked=false; }
-  // initial clear area
-  for(let y=34;y<58;y++) for(let x=34;x<58;x++){ let t=tiles[y][x]; t.unlocked=true; if(t.ground!=='water'){ t.blocked=false; t.deco=null; }}
-  for(let y=41;y<=44;y++) for(let x=45;x<=50;x++){ tiles[y][x].blocked=true; tiles[y][x].tilled=false; tiles[y][x].ground='path'; }
-  return {
-    cam:{x:0,y:0,scale:1},
-    player:{x:47.5,y:47.5,speed:5.2},
-    gold:260,
-    debt:6500,
-    day:1,
-    time:6*60,
-    toolPower:1,
-    waterPower:1,
-    bag:{turnipSeed:8,potatoSeed:0,blueberrySeed:0},
-    produce:{turnip:0,potato:0,blueberry:0},
-    tiles,
-    automation:{sprinkler:0,seeder:0,harvester:0},
-    structures:[],
-    ownedLand:{},
-    particles:[],
-    totalHarvests:0,
-    totalAutomationHarvests:0,
-    sleeping:false,
-    lastSave:0,
-  };
+function fresh(){return {version:2,gold:420,debt:6500,day:1,weather:'sun',time:6,season:'봄',tiles:makeMap(),bags:{turnip:14,potato:3,strawberry:0,tomato:0,pumpkin:0,blueberry:0},produce:Object.fromEntries(Object.keys(CROPS).map(x=>[x,0])),toolLv:1,waterLv:1,harvestLv:1,structures:[],machInventory:{sprinkler:0,seeder:0,harvester:0},ownedLand:{},flags:{delivery:false,seedSupply:false,calendar:false},totalHarvests:0,autoHarvests:0,earned:0,rewarded:[],focus:{x:49,y:48,zoom:1.16},autoDayClock:0,started:Date.now()};}
+function load(){try{const saved=localStorage.getItem(KEY);if(!saved)return fresh();const s=JSON.parse(saved);if(!Array.isArray(s.tiles)||s.tiles.length!==S)return fresh();
+ const base=fresh();const old=s.version!==2;
+ base.gold=Number.isFinite(s.gold)?s.gold:420;base.debt=Number.isFinite(s.debt)?s.debt:6500;base.day=s.day||1;base.tiles=s.tiles;
+ base.ownedLand=s.ownedLand||{};base.structures=Array.isArray(s.structures)?s.structures:[];base.totalHarvests=s.totalHarvests||0;base.autoHarvests=s.autoHarvests||s.totalAutomationHarvests||0;
+ base.earned=s.earned||0;base.rewarded=s.rewarded||[];base.flags={...base.flags,...s.flags};base.focus=s.focus||base.focus;
+ if(!old){base.bags={...base.bags,...s.bags};base.produce={...base.produce,...s.produce};base.toolLv=s.toolLv||1;base.waterLv=s.waterLv||1;base.harvestLv=s.harvestLv||1;base.machInventory={...base.machInventory,...s.machInventory};base.autoDayClock=s.autoDayClock||0;}
+ else{ // Previous farming prototype migration: keep money, debt, plots, crops, machines and seeds.
+   base.bags={...base.bags,...(s.bag?{turnip:s.bag.turnipSeed||0,potato:s.bag.potatoSeed||0,blueberry:s.bag.blueberrySeed||0}:{})};
+   base.produce={...base.produce,...s.produce};base.toolLv=s.toolPower||1;base.waterLv=s.waterPower||1;
+   base.machInventory={...base.machInventory,...s.automation};
+   for(const row of base.tiles)for(const t of row){if(!t)continue;if(t.crop){const days=CROPS[t.crop.type]?.days||3;const oldDuration={turnip:45,potato:72,blueberry:110}[t.crop.type]||45;t.crop.progress=t.crop.progress??clamp((t.crop.age||0)/oldDuration*days,0,days);t.crop.ready=!!t.crop.ready||t.crop.progress>=days;} }
+   base.focus={x:48,y:48,zoom:1.16};
+ }
+ for(const row of base.tiles)for(const t of row){if(t){if(!('crop' in t))t.crop=null;if(!('structure'in t))t.structure=null;if(!('watered'in t))t.watered=false;if(!('tilled'in t))t.tilled=false;}}
+ base.version=2;base.season=seasonOf(base.day);return base;
+}catch(e){console.warn('save recovery',e);return fresh();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(game))}catch(e){console.warn('Autosave unavailable',e)}}
+function seasonOf(day){return ['봄','여름','가을','겨울'][Math.floor((day-1)/12)%4];}
+function say(message){const a=$('toast');a.textContent=message;a.classList.add('show');toastUntil=performance.now()+2300;}
+function chime(freq=600){if(!audioOn)return;try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.setValueAtTime(freq,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(freq*.67,audioCtx.currentTime+.12);g.gain.setValueAtTime(.035,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.2);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.2)}catch(e){}}
+function forRange(x,y,r,fn){for(let yy=y-r;yy<=y+r;yy++)for(let xx=x-r;xx<=x+r;xx++){if(xx>=0&&yy>=0&&xx<S&&yy<S&&Math.max(Math.abs(xx-x),Math.abs(yy-y))<=r)fn(tile(xx,yy),xx,yy)}}
+function editable(t){return t&&t.unlocked&&!t.blocked&&t.ground!=='water'&&!t.structure}
+function sow(t,key){if(!editable(t)||!t.tilled||t.crop||!game.bags[key])return false;t.crop={type:key,progress:0,ready:false};game.bags[key]--;return true}
+function harvest(t,automatic=false){if(!t?.crop||!t.crop.ready)return false;let key=t.crop.type,def=CROPS[key];if(!def)return false;game.produce[key]=(game.produce[key]||0)+1;game.totalHarvests++;if(automatic)game.autoHarvests++;
+ if(Math.random()<.035){game.gold+=Math.round(def.value*1.5);say('황금 품질 보너스! +'+money(def.value*1.5));}
+ if(def.regrow){t.crop.progress=def.days-def.regrow;t.crop.ready=false;}else t.crop=null;
+ for(const m of MILESTONES)if(game.totalHarvests>=m.at&&!game.rewarded.includes(m.at)){game.rewarded.push(m.at);game.gold+=m.reward;say(`달성! ${m.text} · 보너스 ${money(m.reward)}`)}
+ return true;
 }
-function save(){
-  try{localStorage.setItem(STATE_KEY, JSON.stringify(game));}
-  catch(e){/* private browsing or quota: continue playing without persistence */}
+function perform(x,y,quiet=false){const t=tile(x,y);if(!t||!t.unlocked){if(!quiet)say('아직 소유하지 않은 땅이야. 상점에서 농지를 확장해 봐.');return false}
+ if(Object.hasOwn(MACHINES,tool)){
+  if(!editable(t)||t.crop||t.tilled){if(!quiet)say('기계는 비어 있는 평지에 설치해 줘.');return false}
+  if(!game.machInventory[tool]){if(!quiet)say('설치할 기계를 먼저 상점에서 구매해 줘.');return false}
+  game.machInventory[tool]--;t.structure=tool;game.structures.push({x,y,type:tool});tool='hoe';drawTools();say('설치 완료! 다음 날부터 자동으로 작동해.');chime(850);return true;
+ }
+ let applied=0;
+ const r=tool==='hoe'?game.toolLv-1:tool==='water'?game.waterLv-1:tool==='harvest'?game.harvestLv-1:0;
+ forRange(x,y,r,(tt)=>{
+   if(tool==='hoe'){if(editable(tt)&&!tt.tilled&&!tt.crop){tt.tilled=true;tt.deco=null;applied++}}
+   else if(tool==='water'){if(tt&&tt.unlocked&&(tt.tilled||tt.crop)){tt.watered=true;applied++}}
+   else if(tool==='harvest'){if(harvest(tt))applied++}
+   else if(tool==='clear'){if(tt&&tt.unlocked&&tt.deco&&tt.ground!=='water'&&!tt.structure){tt.deco=null;tt.blocked=false;game.gold+=3;applied++}}
+   else if(Object.hasOwn(CROPS,tool)){if(sow(tt,tool))applied++}
+ });
+ if(applied){chime(tool==='harvest'?730:410);if(tool==='harvest'&&applied>1)say(`${applied}개 한꺼번에 수확!`);return true}
+ if(!quiet){if(Object.hasOwn(CROPS,tool)&&!game.bags[tool])say(`${CROPS[tool].name} 씨앗이 없어. 상점에서 구입해 줘.`);else if(tool==='harvest')say('아직 다 자란 작물이 없어.');else say('해당 위치에는 작업할 수 없어.');}
+ return false;
 }
-function load(){
-  try{
-    const raw=localStorage.getItem(STATE_KEY);
-    if(!raw) return newGame();
-    const s=JSON.parse(raw);
-    // migrate if missing
-    s.particles=[];
-    s.cam=s.cam||{x:0,y:0,scale:1};
-    s.ownedLand=s.ownedLand||{};
-    s.automation=s.automation||{sprinkler:0,seeder:0,harvester:0};
-    s.bag=s.bag||{turnipSeed:8,potatoSeed:0,blueberrySeed:0};
-    s.produce=s.produce||{turnip:0,potato:0,blueberry:0};
-    return s;
-  }catch(e){ return newGame(); }
+function waterAround(t,x,y){forRange(x,y,3,(a)=>{if(a&&a.unlocked&&(a.tilled||a.crop))a.watered=true})}
+function runAutomations(){
+ if(game.weather==='rain')for(const row of game.tiles)for(const t of row)if(t?.crop||t?.tilled)t.watered=true;
+ for(const m of game.structures)if(m.type==='sprinkler')waterAround(tile(m.x,m.y),m.x,m.y);
+ // Growth comes before harvest, then replant. Only adjacent automation zones are affected.
+ for(const row of game.tiles)for(const t of row)if(t?.crop){const c=t.crop;const d=CROPS[c.type];if(!d)continue;if(!c.ready){c.progress+=t.watered?1.48:.75;if(c.progress>=d.days)c.ready=true;}}
+ for(const m of game.structures)if(m.type==='harvester')forRange(m.x,m.y,3,t=>harvest(t,true));
+ if(game.flags.seedSupply&&game.bags.turnip<12&&game.gold>=210){game.bags.turnip+=14;game.gold-=210;}
+ for(const m of game.structures)if(m.type==='seeder')forRange(m.x,m.y,3,t=>sow(t,'turnip'));
+ if(game.flags.delivery)sellAll(true);
+ for(const row of game.tiles)for(const t of row)if(t)t.watered=false;
 }
-
-function resize(){
-  const dpr=Math.min(devicePixelRatio||1, 2);
-  canvas.width=Math.floor(innerWidth*dpr);
-  canvas.height=Math.floor(innerHeight*dpr);
-  canvas.style.width=innerWidth+'px';
-  canvas.style.height=innerHeight+'px';
-  ctx.setTransform(dpr,0,0,dpr,0,0);
+function newDay(){game.day++;game.season=seasonOf(game.day);const r=Math.random();game.weather=game.season==='겨울'?(r<.25?'snow':r<.5?'rain':'sun'):(r<.18?'rain':r<.28?'cloud':'sun');runAutomations();
+ if(game.debt===0&&!game.flags.debtParty){game.flags.debtParty=true;game.gold+=1000;say('빚 완납! 마을에서 축하 선물 1,000G를 보냈어!')}
+ else say(`${game.season} ${game.day}일차 · ${weatherText()} · 농장이 하루 자랐어.`);
+ game.autoDayClock=0;chime(660);save();refreshUI();}
+function weatherText(){return({sun:'맑음',rain:'비',cloud:'흐림',snow:'눈'})[game.weather]||'맑음'}
+function sellAll(auto=false){let n=0,total=0;for(const key of Object.keys(CROPS)){const count=game.produce[key]||0;total+=count*CROPS[key].value;n+=count;game.produce[key]=0}game.gold+=total;game.earned+=total;
+ if(!auto)say(n?`수확물 ${n}개 배송! +${money(total)}`:'창고에 판매할 작물이 없어.');if(n)chime(830);return total}
+function repay(amount){if(game.debt<=0){say('이미 모든 빚을 갚았어!');return}amount=Math.min(amount,game.gold,game.debt);if(amount<=0){say('상환할 돈이 부족해.');return}game.gold-=amount;game.debt-=amount;save();showDebt();if(game.debt===0){say('축하해! 빚을 모두 갚았어!');chime(1100);}else say(`${money(amount)} 상환 완료!`);refreshUI();}
+function buy(cost,callback){if(game.gold<cost){say('돈이 부족해.');return}game.gold-=cost;callback();chime(740);save();showShop();refreshUI();}
+function purchaseLand(d){buy(d.cost,()=>{game.ownedLand[d.id]=true;const [sx,sy,w,h]=d.rect;putRect(game.tiles,sx,sy,w,h,t=>{if(t.ground!=='water'){t.unlocked=true;t.blocked=false;t.deco=hash(sx+w,sy+h,Math.round(Math.random()*10000))<.12?'flower':null}});say(d.name+' 구역을 개방했어!')})}
+function itemHTML(title,desc,price,clickName,disabled=false){return `<article class="shopItem"><div><div class="shopName">${title}</div><div class="shopDesc">${desc}</div></div><button ${disabled?'disabled':''} data-act="${clickName}">${price}</button></article>`}
+function modal(title,kicker,html){$('modalTitle').textContent=title;$('modalKicker').textContent=kicker;$('modalBody').innerHTML=html;$('modal').classList.remove('hidden')}
+function showShop(){let a='<div class="shopGrid"><section><h3 class="shopTitle">✿ 씨앗 상점</h3>';for(const [key,d] of Object.entries(CROPS)){const price=d.cost*5;a+=itemHTML(`${d.emoji} ${d.name} 씨앗 ×5`,`성장 ${d.days}일${d.regrow?' · 수확 후 다시 성장':''} · 판매 ${money(d.value)} / 개`,money(price),'seed_'+key,game.gold<price)}
+ a+='<h3 class="shopTitle">⚒ 농기구 강화</h3>';
+ const upgrades=[['toolLv','괭이 작업 범위','한 번에 여러 칸 경작',620],['waterLv','물주기 작업 범위','넓은 밭을 편리하게 관수',540],['harvestLv','수확 작업 범위','한 번에 여러 작물 수확',740]];
+ for(const [k,n,d,c] of upgrades){const price=c*game[k];a+=itemHTML(`${n} Lv.${game[k]}`,d,game[k]>=3?'최대':money(price),'up_'+k,game[k]>=3||game.gold<price)}
+ a+='</section><section><h3 class="shopTitle">🌾 농지 개척</h3>';
+ for(const l of LANDS){const bought=!!game.ownedLand[l.id];a+=itemHTML(l.name,l.desc,bought?'구매 완료':money(l.cost),'land_'+l.id,bought||game.gold<l.cost)}
+ a+='<h3 class="shopTitle">⚙ 농장 자동화</h3>';
+ for(const [k,m] of Object.entries(MACHINES)){a+=itemHTML(`${m.emoji} ${m.name}`,m.desc, money(m.cost),'machine_'+k,game.gold<m.cost)}
+ const perks=[['delivery','자동 출하소','매일 창고의 수확물 자동 판매',2800],['seedSupply','씨앗 정기배송','매일 부족한 순무 씨앗 자동 구매',3100],['calendar','자동 날짜 진행','약 30초마다 새날 · 방치형 운영',4700]];
+ for(const [k,n,d,c] of perks)a+=itemHTML(n,d,game.flags[k]?'해금됨':money(c),'flag_'+k,game.flags[k]||game.gold<c);
+ a+='</section></div>';modal('농장 상점','달빛마을 씨앗과 도구',a);
+ $('modalBody').querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+  const id=b.dataset.act;
+  if(id.startsWith('seed_')){const key=id.slice(5);buy(CROPS[key].cost*5,()=>{game.bags[key]+=5;say(`${CROPS[key].name} 씨앗 5개 구매 완료!`)})}
+  else if(id.startsWith('up_')){const key=id.slice(3),d={toolLv:620,waterLv:540,harvestLv:740}[key];if(game[key]<3)buy(d*game[key],()=>{game[key]++;say('도구 강화 완료!');drawTools()})}
+  else if(id.startsWith('land_')){const l=LANDS.find(x=>x.id===id.slice(5));if(l&&!game.ownedLand[l.id])purchaseLand(l)}
+  else if(id.startsWith('machine_')){const key=id.slice(8);buy(MACHINES[key].cost,()=>{game.machInventory[key]++;tool=key;drawTools();say(`설치할 위치를 선택해 줘: ${MACHINES[key].name}`);$('modal').classList.add('hidden')})}
+  else if(id.startsWith('flag_')){const key=id.slice(5),cost={delivery:2800,seedSupply:3100,calendar:4700}[key];if(!game.flags[key])buy(cost,()=>{game.flags[key]=true;say('자동화 기능이 해금됐어!')})}
+ });}
+function showDebt(){let txt=`<div class="debtBox"><div class="shopLabel">농장 장기 대출 잔액</div><strong>${money(game.debt)}</strong><p class="note">천천히 갚아도 괜찮아. 연체 벌금이나 게임 오버는 없어.<br>빚을 모두 갚으면 농장 확장에 집중할 수 있어.</p><div class="paymentButtons"><button data-pay="500">500G 상환</button><button data-pay="2000">2,000G 상환</button><button data-pay="all">가능한 만큼 상환</button></div></div>`;
+ modal('농장 빚 상환','작은 성취가 쌓이면 농장도 자라요',txt);
+ $('modalBody').querySelectorAll('[data-pay]').forEach(b=>b.onclick=()=>repay(b.dataset.pay==='all'?game.gold:Number(b.dataset.pay)));}
+function drawTools(){let list=TOOL_LIST.filter(([id])=>!Object.hasOwn(CROPS,id)||['turnip','potato'].includes(id)||game.bags[id]>0||game.totalHarvests>30);
+ if(Object.hasOwn(MACHINES,tool)&&game.machInventory[tool])list.push([tool,MACHINES[tool].name,MACHINES[tool].emoji,'기계 설치']);
+ const strip=$('toolstrip');strip.innerHTML='';for(const [id,name,emoji,description] of list){const b=document.createElement('button');b.className='tool'+(id===tool?' active':'');b.title=description;b.dataset.tool=id;b.innerHTML=`<span class="emoji">${emoji}</span><span class="toolname">${name}</span>`;b.onclick=()=>{tool=id;drawTools()};strip.appendChild(b)}
 }
-
-function setupUI(){
-  ui.shopBtn.onclick=()=>renderShop(true);
-  ui.payDebtBtn.onclick=()=>{
-    if(game.gold>=500 && game.debt>0){ game.gold-=500; game.debt=Math.max(0, game.debt-500); showMsg('빚 500G를 상환했다.'); }
-    else showMsg('현금이 부족하거나 이미 빚을 다 갚았다.');
-    updateHUD(); save();
-  };
-  ui.sleepBtn.onclick=()=>nextDay();
-  ui.sellBtn.onclick=()=>{ const amount=autoShipProduce(); showMsg(amount>0?`수확물 판매: +${fmt(amount)}`:"판매할 작물이 없다."); updateHUD(); save(); };
-  document.querySelectorAll('[data-close]').forEach(btn=>btn.onclick=()=>$(btn.dataset.close).classList.add('hidden'));
-  ui.hotbar.innerHTML='';
-  toolDefs.forEach(t=>{
-    const b=document.createElement('button'); b.className='toolBtn'; b.dataset.tool=t.id;
-    b.innerHTML=`<strong>${t.label}</strong><small>${t.key}</small>`;
-    b.onclick=()=>{activeTool=t.id; refreshHotbar();};
-    ui.hotbar.appendChild(b);
-  });
-  refreshHotbar();
+function row(label,num){return `<div class="kv"><span>${label}</span><strong>${num}</strong></div>`}
+function refreshUI(){
+ $('gold').textContent=money(game.gold);$('debt').textContent=money(game.debt);$('day').textContent=`${game.day}일차`;$('weather').textContent=`${game.season} · ${weatherText()}`;
+ $('seedSummary').innerHTML=Object.entries(CROPS).filter(([k])=>game.bags[k]>0||['turnip','potato'].includes(k)).map(([k,v])=>row(v.emoji+' '+v.name,game.bags[k]+'개')).join('');
+ $('produceSummary').innerHTML=Object.entries(CROPS).filter(([k])=>game.produce[k]>0).map(([k,v])=>row(v.emoji+' '+v.name,game.produce[k]+'개')).join('')||'<div class="sideParagraph">아직 수확물이 없어요.</div>';
+ $('machineSummary').innerHTML=Object.entries(MACHINES).map(([k,m])=>row(m.emoji+' '+m.name,game.structures.filter(x=>x.type===k).length+'대')).join('')+row('자동 출하',game.flags.delivery?'작동 중':'미구매')+row('자동 날짜',game.flags.calendar?'작동 중':'미구매');
+ const debtRate=clamp((6500-game.debt)/6500*100,0,100);$('progressInfo').innerHTML=game.debt?'농사를 지어 빚을 갚고, 큰 농장을 차근차근 개척해 보세요.':'대출 완납! 이제 커다란 자동화 농장으로 성장해 보세요.';
+ $('goalBars').innerHTML=`<div class="kv"><span>대출 상환</span><strong>${debtRate.toFixed(0)}%</strong></div><div class="goalBar"><div style="width:${debtRate}%"></div></div>`+row('누적 수확',game.totalHarvests+'개')+row('총 판매',money(game.earned));
 }
-function refreshHotbar(){
-  [...ui.hotbar.children].forEach(b=>b.classList.toggle('active', b.dataset.tool===activeTool));
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.floor(innerWidth*dpr);canvas.height=Math.floor(innerHeight*dpr);canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;}
+function getScreen(x,y){const z=T*game.focus.zoom;return{x:(x-game.focus.x)*z+innerWidth/2,y:(y-game.focus.y)*z+innerHeight/2};}
+function worldAt(x,y){const z=T*game.focus.zoom;return {x:(x-innerWidth/2)/z+game.focus.x,y:(y-innerHeight/2)/z+game.focus.y}}
+function moveCamera(dx,dy){const z=T*game.focus.zoom;game.focus.x=clamp(game.focus.x-dx/z,0,S);game.focus.y=clamp(game.focus.y-dy/z,0,S)}
+function zoomAt(factor,x=innerWidth/2,y=innerHeight/2){const before=worldAt(x,y);game.focus.zoom=clamp(game.focus.zoom*factor,.6,2.35);const after=worldAt(x,y);game.focus.x=clamp(game.focus.x+before.x-after.x,0,S);game.focus.y=clamp(game.focus.y+before.y-after.y,0,S)}
+function hookInput(){
+ window.addEventListener('resize',resize);
+ window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if(!$('modal').classList.contains('hidden'))return;
+  if(e.key.toLowerCase()==='q')showShop();if(e.key.toLowerCase()==='e')newDay();
+  if(e.key>='1'&&e.key<='9'){const b=$('toolstrip').children[Number(e.key)-1];if(b){tool=b.dataset.tool;drawTools()}}
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const dir={ArrowLeft:[120,0],ArrowRight:[-120,0],ArrowUp:[0,120],ArrowDown:[0,-120]}[e.key];moveCamera(...dir)}});
+ const touches={};let zoomBaseline=0;
+ canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pointer.set(e.pointerId,{x:e.clientX,y:e.clientY,originalX:e.clientX,originalY:e.clientY,button:e.button,shift:e.shiftKey,moved:false,lastPaint:''});if(pointer.size===2){const p=[...pointer.values()];zoomBaseline=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y)}}, {passive:true});
+ canvas.addEventListener('pointermove',e=>{const w=worldAt(e.clientX,e.clientY);hover={x:Math.floor(w.x),y:Math.floor(w.y)};const p=pointer.get(e.pointerId);if(!p)return;
+  const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
+  if(Math.hypot(p.x-p.originalX,p.y-p.originalY)>6)p.moved=true;
+  if(pointer.size===2){const a=[...pointer.values()],distance=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);if(zoomBaseline>20){zoomAt(distance/zoomBaseline,(a[0].x+a[1].x)/2,(a[0].y+a[1].y)/2)}zoomBaseline=distance;return}
+  if(p.shift){const key=`${hover.x},${hover.y}`;if(p.lastPaint!==key){perform(hover.x,hover.y,true);p.lastPaint=key;}return}
+  if(p.moved)moveCamera(dx,dy);
+ });
+ canvas.addEventListener('pointerup',e=>{const p=pointer.get(e.pointerId);if(!p)return;if(pointer.size===1&&!p.moved){const w=worldAt(e.clientX,e.clientY);perform(Math.floor(w.x),Math.floor(w.y))}pointer.delete(e.pointerId);zoomBaseline=0;});
+ canvas.addEventListener('pointercancel',e=>pointer.delete(e.pointerId));
+ canvas.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.13:.885,e.clientX,e.clientY)},{passive:false});
+ canvas.addEventListener('contextmenu',e=>e.preventDefault());
+ $('zoomIn').onclick=()=>zoomAt(1.2);$('zoomOut').onclick=()=>zoomAt(.84);$('homeCam').onclick=()=>{game.focus.x=49;game.focus.y=48;game.focus.zoom=1.16};
+ $('shopBtn').onclick=showShop;$('debtBtn').onclick=showDebt;$('nextDayBtn').onclick=newDay;$('sellBtn').onclick=()=>{sellAll();refreshUI();save()};
+ $('audioToggle').onclick=()=>{audioOn=!audioOn;$('audioToggle').textContent=audioOn?'♫':'♪';if(audioOn)chime(770)};
+ $('closeModal').onclick=closeModal;$('modal').querySelector('[data-close]').onclick=closeModal;
+ $('sideToggle').onclick=()=>{$('sideInfo').classList.toggle('minimized');$('sideToggle').textContent=$('sideInfo').classList.contains('minimized')?'⌄':'⌃'};
 }
-function renderShop(open=false){
-  const makeItem=(name,desc,meta,price,enabled,fn)=>{
-    const row=document.createElement('div'); row.className='shopItem';
-    row.innerHTML=`<div><div class="name">${name}</div><div class="desc">${desc}</div><div class="meta">${meta}</div></div>`;
-    const btn=document.createElement('button'); btn.textContent=price; btn.disabled=!enabled; btn.onclick=fn; row.appendChild(btn); return row;
-  };
-  ui.seedShop.innerHTML='';
-  ui.seedShop.appendChild(makeItem('순무 씨앗 x5','빠르게 자라며 초반 수익에 좋다','가방에 5개 추가','90G',game.gold>=90,()=>{game.gold-=90; game.bag.turnipSeed+=5; renderShop(); showMsg('순무 씨앗을 샀다.');}));
-  ui.seedShop.appendChild(makeItem('감자 씨앗 x5','조금 느리지만 더 비싸게 팔린다','가방에 5개 추가','150G',game.gold>=150,()=>{game.gold-=150; game.bag.potatoSeed+=5; renderShop(); showMsg('감자 씨앗을 샀다.');}));
-  ui.seedShop.appendChild(makeItem('블루베리 씨앗 x5','후반 고수익 작물','가방에 5개 추가','400G',game.gold>=400,()=>{game.gold-=400; game.bag.blueberrySeed+=5; renderShop(); showMsg('블루베리 씨앗을 샀다.');}));
-
-  ui.toolShop.innerHTML='';
-  const toolUpgrades=[
-    {name:'괭이 범위 업그레이드', desc:'한 번에 더 넓은 범위 경작', meta:`현재 Lv.${game.toolPower}`, price: 320*game.toolPower, enabled:game.gold>=320*game.toolPower && game.toolPower<3, act:()=>{game.gold-=320*game.toolPower; game.toolPower++; renderShop(); showMsg('괭이 범위가 넓어졌다.');}},
-    {name:'물뿌리개 범위 업그레이드', desc:'한 번에 더 넓은 범위에 물주기', meta:`현재 Lv.${game.waterPower}`, price: 260*game.waterPower, enabled:game.gold>=260*game.waterPower && game.waterPower<3, act:()=>{game.gold-=260*game.waterPower; game.waterPower++; renderShop(); showMsg('물뿌리개가 강해졌다.');}},
-  ];
-  toolUpgrades.forEach(u=>ui.toolShop.appendChild(makeItem(u.name,u.desc,u.meta, u.enabled?fmt(u.price):u.price?fmt(u.price):'완료', u.enabled, u.act)));
-
-  ui.landShop.innerHTML='';
-  landDefs.forEach(l=>{
-    const owned=game.ownedLand[l.id];
-    ui.landShop.appendChild(makeItem(l.name,'새로운 대형 농지와 장식 구역을 개방한다', owned?'구매 완료':'넓은 부지를 개간 가능', owned?'완료':fmt(l.cost), !owned && game.gold>=l.cost, ()=>buyLand(l.id)));
-  });
-
-  ui.automationShop.innerHTML='';
-  Object.entries(automationDefs).forEach(([id,a])=>{
-    ui.automationShop.appendChild(makeItem(a.name,a.desc,`보유 ${game.automation[id]}개`, fmt(a.cost), game.gold>=a.cost, ()=>{game.gold-=a.cost; game.automation[id]++; activeTool=id; refreshHotbar(); renderShop(); showMsg(`${a.name} 설치 모드로 전환.`);}));
-  });
-  if(open) ui.shopModal.classList.remove('hidden');
-  updateHUD();
+function closeModal(){$('modal').classList.add('hidden')}
+// Draw our own original crisp-edged pixel-art tiles and sprites; no external assets or APIs.
+const seasonPal={봄:['#91bf6f','#83b56c'],여름:['#7fba64','#78ae5e'],가을:['#b9b978','#b1ad6a'],겨울:['#c3d1c3','#b5c9b8']};
+function px(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
+function treeSprite(x,y,season){px(x+13,y+20,7,12,'#75553a');px(x+9,y+20,15,5,'#614632');const a=season==='가을'?['#ca9956','#af7544','#e5b86b']:season==='겨울'?['#728b77','#9fb4a0','#d6ddd0']:['#457c49','#6b9f57','#89b86a'];px(x+7,y+9,21,13,a[0]);px(x+11,y+3,16,11,a[1]);px(x+3,y+14,12,12,a[1]);px(x+21,y+12,10,11,a[0]);px(x+13,y+5,5,5,a[2]);px(x+22,y+17,4,4,a[2]);px(x+6,y+20,6,4,a[0])}
+function drawCrop(t,x,y){const c=t.crop;if(!c)return;const d=CROPS[c.type];if(!d)return;const ratio=clamp(c.progress/d.days,0,1),stage=c.ready?4:Math.min(3,Math.floor(ratio*4));px(x+15,y+21,3,7,d.stem);if(stage===0){px(x+13,y+21,4,4,d.leaf);px(x+17,y+19,5,4,d.leaf);return}
+ px(x+8,y+17,8,6,d.leaf);px(x+16,y+12,7,9,d.leaf);px(x+20,y+18,7,6,d.leaf);if(stage>=2){px(x+10,y+11,7,7,d.leaf);px(x+21,y+10,5,7,d.leaf)}
+ if(stage>=3){px(x+11,y+15,10,11,d.fruit);if(c.type==='turnip'){px(x+13,y+21,8,5,'#dfc9c5')}if(c.type==='strawberry')px(x+13,y+17,3,3,'#ffcd98');if(c.type==='pumpkin'){px(x+8,y+12,19,14,d.fruit);px(x+15,y+9,5,4,'#4a7839')}}
+ if(c.ready){px(x+12,y+2,3,3,'#fff0ae');px(x+17,y+1,4,4,'#fdfbdf');px(x+19,y+7,3,3,'#ffe5a1')}
 }
-
-function buyLand(id){
-  const l=landDefs.find(v=>v.id===id); if(!l||game.ownedLand[id]||game.gold<l.cost) return;
-  game.gold-=l.cost; game.ownedLand[id]=true;
-  const [sx,sy,w,h]=l.rect;
-  for(let y=sy;y<sy+h;y++) for(let x=sx;x<sx+w;x++){
-    const t=game.tiles[y][x]; t.unlocked=true; if(t.ground!=='water'){ t.blocked=false; if(Math.random()<0.14)t.deco='weed'; else if(Math.random()<0.06)t.deco='flower'; else t.deco=null; }
-  }
-  showMsg(`${l.name} 부지를 개간했다!`);
-  renderShop();
+function structureSprite(type,x,y){const a=type==='sprinkler';if(a){px(x+13,y+8,6,18,'#667b83');px(x+7,y+8,19,5,'#b9e3e9');px(x+15,y+5,3,5,'#e4f9ff');px(x+5,y+19,5,3,'#83d8f6');px(x+25,y+17,4,4,'#88d9ef')}else if(type==='seeder'){px(x+7,y+10,19,16,'#a86a38');px(x+9,y+5,15,9,'#d9b96c');px(x+11,y+12,10,7,'#724d2f');px(x+5,y+24,6,5,'#665d57');px(x+22,y+24,6,5,'#665d57')}else{px(x+6,y+10,21,13,'#c7d2d5');px(x+9,y+5,14,10,'#8097a9');px(x+12,y+8,8,4,'#c1eafa');px(x+4,y+21,8,7,'#575655');px(x+22,y+21,8,7,'#575655');px(x+25,y+14,6,3,'#e4ad56')}}
+function drawHouse(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.shadowColor='rgba(24,41,23,.2)';ctx.shadowBlur=4;px(1,26,32*7-2,32*6-24,'#b6a476');ctx.shadowBlur=0;px(7,51,200,104,'#e4c08d');px(15,61,184,83,'#eacb9e');px(0,50,224,19,'#6b744b');px(11,26,202,29,'#b8664f');px(20,8,184,28,'#bf7252');px(35,0,148,15,'#d68b5a');for(let i=0;i<11;i++){px(13+i*18,31+(i%2)*2,10,3,'#e3a17b')}px(85,96,43,59,'#805e4b');px(92,105,29,49,'#aa8155');px(143,86,41,38,'#8cb2b3');px(147,90,33,30,'#c6e6dc');px(14,86,42,38,'#8cb2b3');px(18,90,34,30,'#c7e7dc');px(34,88,4,36,'#7d745f');px(160,88,4,36,'#7d745f');px(99,126,5,5,'#f6d69a');ctx.restore()}
+function drawBarn(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y));px(0,55,8*32,6*32-55,'#a75d42');px(13,69,230,105,'#c57a54');px(11,45,236,24,'#e9c092');px(40,0,168,52,'#9d624c');px(11,25,226,31,'#ba764e');px(75,92,85,82,'#77563e');px(89,105,56,69,'#e0c498');px(111,105,6,69,'#926945');px(185,90,33,36,'#a7ced2');px(194,90,4,36,'#7e8f84');px(29,91,34,37,'#a7ced2');ctx.restore()}
+function tileSprite(t,wx,wy,x,y,z){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(z/32,z/32);
+ if(t.ground==='water'){px(0,0,32,32,'#65afb8');px(0,0,32,3,'#81bec1');if(hash(wx,wy,13)<.8)px(6,12,13,2,'#9dd5cc');px(18,25,8,2,'#a2d9cc');ctx.restore();return}
+ const pal=seasonPal[game.season]||seasonPal.봄;px(0,0,32,32,pal[(wx+wy)%2]);const h=hash(wx,wy);
+ if(h<.8){px(5+Math.floor(h*17),8+Math.floor(h*7),2,3,game.season==='겨울'?'#dfe9d7':'#6eae60');px(18,24,4,2,game.season==='겨울'?'#e5f0e7':'#95c17a')}
+ if(t.ground==='path'){px(0,0,32,32,'#d4be91');px(3,9,8,3,'#decaa2');px(18,24,10,3,'#c3a77b')}
+ if(t.tilled){px(2,2,28,28,t.watered?'#6f6150':'#866448');px(4,5,24,2,t.watered?'#7d6d57':'#a48158');px(4,15,24,2,'#4e483c');px(4,25,24,2,'#5f493a');px(9,7,2,5,'#aa865c');px(22,19,3,4,'#aa865c');}
+ if(t.deco==='flower'){px(12,18,3,9,'#4c8f4b');px(9,12,10,9,game.season==='겨울'?'#fff0e3':'#efc1bc');px(12,15,4,4,'#f7e5ab')}
+ else if(t.deco==='bush'){px(5,17,22,12,'#467d43');px(9,13,17,12,'#619c4c');px(14,17,4,3,'#b2cc76')}
+ else if(t.deco==='grass'){px(8,19,2,10,'#3e8e4e');px(13,17,3,12,'#5da759');px(20,20,2,7,'#4c8e4b')}
+ else if(t.deco==='stone'){px(4,19,23,12,'#83968c');px(9,15,14,7,'#b0beb4');px(5,22,23,5,'#6f8582')}
+ else if(t.deco==='tree')treeSprite(0,0,game.season);
+ if(t.crop)drawCrop(t,0,0);
+ if(t.structure)structureSprite(t.structure,0,0);
+ if(!t.unlocked){px(0,0,32,32,'rgba(27,49,36,.44)');if(wx%3===0&&wy%3===0)px(13,14,5,5,'#829579')}
+ ctx.restore();}
+function render(){const w=innerWidth,h=innerHeight,z=T*game.focus.zoom;ctx.fillStyle=(seasonPal[game.season]||seasonPal.봄)[0];ctx.fillRect(0,0,w,h);
+ let x0=Math.max(0,Math.floor(game.focus.x-w/(2*z))-1),y0=Math.max(0,Math.floor(game.focus.y-h/(2*z))-1),x1=Math.min(S,Math.ceil(game.focus.x+w/(2*z))+1),y1=Math.min(S,Math.ceil(game.focus.y+h/(2*z))+1);
+ for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const a=getScreen(x,y);tileSprite(tile(x,y),x,y,a.x,a.y,z)}
+ // Buildings are part of the farm itself. There is intentionally no player character.
+ const houses=[{x:44,y:44,draw:drawHouse},{x:56,y:45,draw:drawBarn}];
+ for(const obj of houses){const a=getScreen(obj.x,obj.y);if(a.x>-400&&a.x<w+100&&a.y>-300&&a.y<h+150){ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y));ctx.scale(z/32,z/32);obj.draw(0,0);ctx.restore()}}
+ // boundary posts around the starting area
+ for(let x=31;x<=67;x++){for(const y of [33,65]){const a=getScreen(x,y);if(a.x>=-50&&a.x<w+50&&a.y>=-50&&a.y<h+50){ctx.fillStyle='#d9bf8b';ctx.fillRect(a.x,a.y,Math.max(2,z*.1),Math.max(4,z*.35))}}}
+ if(hover&&hover.x>=0&&hover.y>=0&&hover.x<S&&hover.y<S){const a=getScreen(hover.x,hover.y);const t=tile(hover.x,hover.y);ctx.strokeStyle=t?.unlocked?'rgba(255,255,226,.98)':'rgba(249,162,131,.95)';ctx.lineWidth=2;ctx.strokeRect(Math.round(a.x)+1,Math.round(a.y)+1,z-2,z-2)}
+ if(game.weather==='rain'){ctx.fillStyle='rgba(59,90,108,.06)';ctx.fillRect(0,0,w,h);for(let i=0;i<80;i++){const xx=(hash(i,game.day,1)*w+(performance.now()*.11*(i%3+1)))%w,yy=(hash(i,game.day,2)*h+performance.now()*.26*(1+i%3))%h;ctx.fillStyle='rgba(218,236,245,.37)';ctx.fillRect(xx,yy,1,8)}}
+ if(game.season==='겨울'){ctx.fillStyle='rgba(230,246,238,.12)';ctx.fillRect(0,0,w,h)}
 }
-
-function updateHUD(){
-  ui.gold.textContent=fmt(game.gold);
-  ui.debt.textContent=fmt(game.debt);
-  ui.day.textContent=`Day ${game.day}`;
-  const h=Math.floor(game.time/60)%24, m=Math.floor(game.time%60);
-  ui.clock.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-  ui.inventory.innerHTML=`
-    <div class="itemRow"><span>순무 씨앗</span><strong>${game.bag.turnipSeed}</strong></div>
-    <div class="itemRow"><span>감자 씨앗</span><strong>${game.bag.potatoSeed}</strong></div>
-    <div class="itemRow"><span>블루베리 씨앗</span><strong>${game.bag.blueberrySeed}</strong></div>
-    <div class="itemRow"><span>순무</span><strong>${game.produce.turnip}</strong></div>
-    <div class="itemRow"><span>감자</span><strong>${game.produce.potato}</strong></div>
-    <div class="itemRow"><span>블루베리</span><strong>${game.produce.blueberry}</strong></div>`;
-  ui.automationInfo.innerHTML=`
-    <div class="itemRow"><span>스프링클러</span><strong>${game.automation.sprinkler}</strong></div>
-    <div class="itemRow"><span>자동 파종기</span><strong>${game.automation.seeder}</strong></div>
-    <div class="itemRow"><span>수확 드론</span><strong>${game.automation.harvester}</strong></div>
-    <div class="itemRow"><span>자동 수확량</span><strong>${game.totalAutomationHarvests}</strong></div>`;
-  const stage = game.debt>0 ? '초반 목표: 농사로 빚을 갚자' : '후반 목표: 자동화 농장을 완성하자';
-  ui.goals.innerHTML=`${stage}<br>총 수확량: ${game.totalHarvests}<br>다음 확장 비용을 모아보자.`;
-}
-
-function getTile(x,y){ if(x<0||y<0||x>=MAP_W||y>=MAP_H) return null; return game.tiles[y][x]; }
-function forArea(tx,ty,r,cb){ for(let y=ty-r;y<=ty+r;y++) for(let x=tx-r;x<=tx+r;x++) cb(x,y,getTile(x,y)); }
-
-function attemptAction(tx,ty){
-  const t=getTile(tx,ty); if(!t || !t.unlocked) return;
-  if(['sprinkler','seeder','harvester'].includes(activeTool)){
-    if(t.blocked || t.structure || t.ground==='water') return showMsg('설치할 수 없는 위치다.');
-    if(game.automation[activeTool]<=0) return showMsg('보유한 기계가 없다.');
-    t.structure=activeTool; game.structures.push({x:tx,y:ty,type:activeTool,timer:0}); game.automation[activeTool]--; showMsg('자동화 기계를 설치했다.'); updateHUD(); return;
-  }
-  const range = activeTool==='water' ? game.waterPower-1 : activeTool==='hoe' ? game.toolPower-1 : 0;
-  forArea(tx,ty,range,(x,y,tile)=>{
-    if(!tile || !tile.unlocked) return;
-    if(activeTool==='hoe'){
-      if(tile.ground==='grass' && !tile.blocked && !tile.crop && !tile.structure){ tile.tilled=true; tile.ground='dirt'; tile.deco=null; spawnParticles(x+0.5,y+0.5,'soil'); }
-    }else if(activeTool==='water'){
-      if(tile.tilled || tile.crop){ tile.watered=true; spawnParticles(x+0.5,y+0.5,'water'); }
-    }else if(activeTool==='harvest'){
-      harvestTile(x,y,tile,false);
-    }else{
-      const cropKey = activeTool;
-      const bagKey = cropKey+'Seed';
-      if(tile.tilled && !tile.crop && game.bag[bagKey]>0){
-        tile.crop={type:cropKey, age:0, watered:tile.watered, stage:0}; game.bag[bagKey]--; spawnParticles(x+0.5,y+0.5,'leaf');
-      }
-    }
-  });
-  updateHUD();
-}
-function harvestTile(x,y,tile,auto=false){
-  if(!tile?.crop) return;
-  const type=tile.crop.type, def=seedDefs[type];
-  if(tile.crop.age < def.grow) return;
-  tile.crop=null; tile.watered=false;
-  if(auto){ game.gold+=def.sell; } else { game.produce[type]++; }
-  game.totalHarvests++;
-  if(auto) game.totalAutomationHarvests++;
-  spawnParticles(x+0.5,y+0.4,'coin');
-}
-function spawnParticles(x,y,type){
-  const c = type==='coin' ? '#ffd66b' : type==='water' ? '#74b8ff' : type==='leaf' ? '#90dc78' : '#9f7d54';
-  for(let i=0;i<5;i++) game.particles.push({x,y,vx:(Math.random()-0.5)*0.04,vy:-Math.random()*0.06-0.02,life:0.6+Math.random()*0.3,color:c,size:3+Math.random()*3});
-}
-
-function update(dt){
-  if(toastTimer>0){ toastTimer-=dt; if(toastTimer<=0) ui.message.classList.remove('show'); }
-  // player movement
-  const p=game.player; let mx=0,my=0;
-  if(keys['w']||keys['arrowup']) my-=1; if(keys['s']||keys['arrowdown']) my+=1; if(keys['a']||keys['arrowleft']) mx-=1; if(keys['d']||keys['arrowright']) mx+=1;
-  const len=Math.hypot(mx,my)||1; mx/=len; my/=len;
-  let nx=p.x+mx*p.speed*dt, ny=p.y+my*p.speed*dt;
-  if(canWalk(nx,ny)) { p.x=nx; p.y=ny; }
-  game.cam.x += (p.x - game.cam.x) * Math.min(1,dt*5);
-  game.cam.y += (p.y - game.cam.y) * Math.min(1,dt*5);
-
-  // time and crop growth
-  game.time += dt*8;
-  if(game.time>=24*60) nextDay();
-  for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++){
-    const t=game.tiles[y][x];
-    if(t.crop && t.watered){ t.crop.age += dt; const def=seedDefs[t.crop.type]; t.crop.stage=Math.min(def.stages-1, Math.floor((t.crop.age/def.grow)*def.stages)); }
-  }
-  // automation
-  for(const s of game.structures){ s.timer += dt; if(s.type==='sprinkler' && s.timer>3){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>{ if(t && (t.tilled||t.crop)) t.watered=true; }); }
-    if(s.type==='seeder' && s.timer>4){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>{ if(t && t.tilled && !t.crop){ if(game.bag.turnipSeed===0 && game.gold>=seedDefs.turnip.buy) {game.gold-=seedDefs.turnip.buy; game.bag.turnipSeed++;} if(game.bag.turnipSeed>0){t.crop={type:'turnip', age:0, watered:t.watered, stage:0}; game.bag.turnipSeed--;}} }); }
-    if(s.type==='harvester' && s.timer>4.2){ s.timer=0; forArea(s.x,s.y,1,(x,y,t)=>harvestTile(x,y,t,true)); }
-  }
-  // particles
-  game.particles=game.particles.filter(pt=>{ pt.life-=dt; pt.x+=pt.vx*60*dt; pt.y+=pt.vy*60*dt; pt.vy+=0.002; return pt.life>0; });
-
-  // auto-save
-  game.lastSave += dt; if(game.lastSave>5){ game.lastSave=0; save(); }
-  if(mouse.clicked){ handleClick(); mouse.clicked=false; }
-  hudElapsed+=dt; if(hudElapsed>0.25){hudElapsed=0; updateHUD();}
-}
-function canWalk(x,y){
-  const tx=Math.floor(x), ty=Math.floor(y), t=getTile(tx,ty); return !!t && t.unlocked && !t.blocked && t.ground!=='water' && !t.structure;
-}
-function nextDay(){
-  game.day++;
-  game.time=6*60;
-  const sold = autoShipProduce();
-  if(game.day%7===0 && game.debt>0){
-    const payment=Math.min(350, game.gold); game.gold -= payment; game.debt=Math.max(0, game.debt-payment); showMsg(`주간 자동 상환: ${fmt(payment)}`);
-  }else showMsg(`${game.day}일차 아침이 밝았다.`);
-  // reset watering, sprinkle morning start
-  for(let y=0;y<MAP_H;y++) for(let x=0;x<MAP_W;x++){ game.tiles[y][x].watered=false; }
-  for(const s of game.structures){ if(s.type==='sprinkler'){ forArea(s.x,s.y,1,(x,y,t)=>{ if(t && (t.tilled||t.crop)) t.watered=true;}); } }
-  if(sold>0) showMsg(`밤새 ${fmt(sold)} 수익이 정산되었다.`);
-  save();
-}
-function autoShipProduce(){
-  let total=0;
-  Object.entries(game.produce).forEach(([k,v])=>{ if(v>0){ total += v*seedDefs[k].sell; game.produce[k]=0; }});
-  game.gold += total; return total;
-}
-function handleClick(){
-  const rect=canvas.getBoundingClientRect();
-  const sx=mouse.x-rect.left, sy=mouse.y-rect.top;
-  const wx = sx/32 + game.cam.x - innerWidth/(2*TILE);
-  const wy = sy/32 + game.cam.y - innerHeight/(2*TILE);
-  const tx=Math.floor(wx), ty=Math.floor(wy);
-  if(dist(tx+0.5,ty+0.5, game.player.x, game.player.y) > 4.2) return showMsg('너무 멀다. 가까이 가자.');
-  attemptAction(tx,ty);
-}
-function draw(){
-  const w=innerWidth, h=innerHeight;
-  ctx.clearRect(0,0,w,h);
-  // sky tint
-  const daylight = 1 - Math.abs((game.time-12*60)/(12*60))*0.45;
-  ctx.fillStyle=`rgba(247,239,205,${0.15*daylight})`; ctx.fillRect(0,0,w,h);
-  const camX=game.cam.x - w/(2*TILE), camY=game.cam.y - h/(2*TILE);
-  const sx=Math.max(0,Math.floor(camX)-2), sy=Math.max(0,Math.floor(camY)-2), ex=Math.min(MAP_W,Math.ceil(camX+w/TILE)+2), ey=Math.min(MAP_H,Math.ceil(camY+h/TILE)+2);
-  // tiles
-  for(let y=sy;y<ey;y++) for(let x=sx;x<ex;x++) drawTile(x,y,camX,camY);
-  drawFarmhouse(camX,camY);
-  // highlight hovered tile
-  const rect=canvas.getBoundingClientRect();
-  const tx=Math.floor(mouse.x/TILE + camX), ty=Math.floor(mouse.y/TILE + camY);
-  const hx=(tx-camX)*TILE, hy=(ty-camY)*TILE;
-  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.strokeRect(hx+1,hy+1,TILE-2,TILE-2);
-  // player
-  drawPlayer((game.player.x-camX)*TILE,(game.player.y-camY)*TILE);
-  // particles
-  for(const p of game.particles){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color; ctx.fillRect((p.x-camX)*TILE,(p.y-camY)*TILE,p.size,p.size); ctx.globalAlpha=1; }
-  // day night overlay
-  const darkness= clamp(Math.abs(game.time-12*60)/(12*60),0,1)*0.35;
-  if(darkness>0.01){ ctx.fillStyle=`rgba(21,30,61,${darkness})`; ctx.fillRect(0,0,w,h); }
-}
-function drawFarmhouse(camX,camY){
-  const px=(45-camX)*TILE,py=(40-camY)*TILE;
-  ctx.save();
-  ctx.fillStyle='rgba(38,40,24,.20)';ctx.fillRect(px+5,py+115,184,13);
-  ctx.fillStyle='#f0d3a0';ctx.fillRect(px+16,py+50,160,72);
-  ctx.fillStyle='#b76b55';ctx.beginPath();ctx.moveTo(px+2,py+55);ctx.lineTo(px+95,py+5);ctx.lineTo(px+188,py+55);ctx.fill();
-  ctx.fillStyle='#8f4e42';ctx.fillRect(px+18,py+54,160,11);
-  ctx.fillStyle='#d6edf0';ctx.fillRect(px+39,py+75,30,27);ctx.fillRect(px+122,py+75,30,27);
-  ctx.fillStyle='#82583a';ctx.fillRect(px+82,py+81,31,41);
-  ctx.fillStyle='#f6de9c';ctx.fillRect(px+102,py+103,5,5);
-  ctx.fillStyle='#70553a';ctx.fillRect(px+163,py+10,20,24);
-  ctx.restore();
-}
-function drawTile(x,y,camX,camY){
-  const t=game.tiles[y][x]; const px=(x-camX)*TILE, py=(y-camY)*TILE;
-  if(t.ground==='water'){
-    ctx.fillStyle=colors.water; ctx.fillRect(px,py,TILE,TILE);
-    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(px+6,py+5,10,4); ctx.fillRect(px+18,py+15,8,3);
-    return;
-  }
-  ctx.fillStyle = (x+y)%2===0 ? colors.grass : colors.grass2; ctx.fillRect(px,py,TILE,TILE);
-  if(t.ground==='path'){ ctx.fillStyle=colors.path; ctx.fillRect(px,py,TILE,TILE); }
-  if(t.tilled){ ctx.fillStyle=t.watered?colors.wet:colors.tilled; ctx.fillRect(px+2,py+2,TILE-4,TILE-4); ctx.strokeStyle='rgba(0,0,0,.08)'; ctx.strokeRect(px+4,py+4,TILE-8,TILE-8); }
-  if(t.deco==='tree'){ ctx.fillStyle='#6c4d2f'; ctx.fillRect(px+12,py+16,8,12); ctx.fillStyle='#3e8e46'; ctx.beginPath(); ctx.arc(px+16,py+13,11,0,Math.PI*2); ctx.fill(); }
-  if(t.deco==='rock'){ ctx.fillStyle='#8b8f95'; ctx.fillRect(px+8,py+12,14,12); }
-  if(t.deco==='weed'){ ctx.fillStyle='#4da64e'; for(let i=0;i<3;i++)ctx.fillRect(px+10+i*4,py+18-rand(0,4),2,7+rand(0,3)); }
-  if(t.deco==='flower'){ ctx.fillStyle='#ffe39b'; ctx.fillRect(px+13,py+15,6,6); ctx.fillStyle='#55b456'; ctx.fillRect(px+15,py+19,2,4); }
-  if(t.crop){ drawCrop(t.crop,px,py); }
-  if(t.structure){ drawStructure(t.structure,px,py); }
-  if(!t.unlocked){ ctx.fillStyle='rgba(20,32,16,.4)'; ctx.fillRect(px,py,TILE,TILE); }
-}
-function drawCrop(c,px,py){
-  const def=seedDefs[c.type];
-  if(c.stage===0){ ctx.fillStyle='#5a3c28'; ctx.fillRect(px+14,py+16,4,3); return; }
-  ctx.fillStyle=def.leaf; ctx.fillRect(px+11,py+14,10,8);
-  if(c.stage>=2){ ctx.fillStyle=def.color; ctx.fillRect(px+12,py+10,8,8); }
-  if(c.stage>=3){ ctx.fillStyle=def.color; ctx.fillRect(px+9,py+8,14,12); }
-}
-function drawStructure(type,px,py){
-  if(type==='sprinkler'){ ctx.fillStyle='#9db6c5'; ctx.fillRect(px+12,py+8,8,16); ctx.fillStyle='#c9deea'; ctx.fillRect(px+7,py+8,18,4); }
-  if(type==='seeder'){ ctx.fillStyle='#bb8d49'; ctx.fillRect(px+8,py+12,16,10); ctx.fillStyle='#64503c'; ctx.fillRect(px+11,py+9,10,4); }
-  if(type==='harvester'){ ctx.fillStyle='#7f8ea9'; ctx.fillRect(px+7,py+9,18,14); ctx.fillStyle='#f1d078'; ctx.fillRect(px+12,py+12,8,6); }
-}
-function drawPlayer(px,py){
-  ctx.fillStyle='#5c3b28'; ctx.fillRect(px-5,py+4,10,10); // body
-  ctx.fillStyle='#335ed6'; ctx.fillRect(px-5,py+2,10,7);
-  ctx.fillStyle='#f6d8b5'; ctx.fillRect(px-4,py-7,8,8);
-  ctx.fillStyle='#8b5a2b'; ctx.fillRect(px-5,py-10,10,5);
-}
-
-function bind(){
-  addEventListener('resize', resize);
-  addEventListener('keydown',e=>{
-    keys[e.key.toLowerCase()]=true;
-    if(e.key>='1'&&e.key<='6'){ activeTool=toolDefs[Number(e.key)-1].id; refreshHotbar(); }
-    if(e.key.toLowerCase()==='q'){ renderShop(true); }
-    if(e.key.toLowerCase()==='e'){ nextDay(); }
-    if(e.key==='Escape') ui.shopModal.classList.add('hidden');
-  });
-  addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-  canvas.addEventListener('mousemove',e=>{ mouse.x=e.clientX; mouse.y=e.clientY;});
-  canvas.addEventListener('mousedown',e=>{ mouse.down=true; mouse.x=e.clientX; mouse.y=e.clientY; mouse.clicked=true;});
-  canvas.addEventListener('mouseup',()=>mouse.down=false);
-  canvas.addEventListener('touchstart',e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY; mouse.clicked=true; }, {passive:true});
-}
-
-function frame(ts){
-  const dt=Math.min(0.033,(ts-lastTime)/1000||0.016); lastTime=ts;
-  update(dt); draw(); requestAnimationFrame(frame);
-}
-
-function init(){
-  game=load(); resize(); setupUI(); bind(); renderShop(false); updateHUD(); requestAnimationFrame(frame); showMsg('작은 농장에서 시작해 빚을 갚고 자동화를 구축해 보자.');
-}
-init();
+function animate(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;timeAcc+=dt;uiAcc+=dt;saveAcc+=dt;
+ if(game.flags.calendar&&$('modal').classList.contains('hidden')){game.autoDayClock+=dt;if(game.autoDayClock>=31)newDay()}
+ if(uiAcc>.24){refreshUI();uiAcc=0}if(saveAcc>8){save();saveAcc=0}
+ if(toastUntil&&ts>toastUntil){$('toast').classList.remove('show');toastUntil=0}
+ if(ts-lastPaint>35){render();lastPaint=ts}requestAnimationFrame(animate)}
+function init(){game=load();resize();hookInput();if(innerWidth<720){$('sideInfo').classList.add('minimized');$('sideToggle').textContent='⌄'}drawTools();refreshUI();say('농장 전체를 드래그로 둘러보고, 빈 땅을 클릭해 농사를 시작하세요.');requestAnimationFrame(animate)}init();
 })();
 
 </script>
