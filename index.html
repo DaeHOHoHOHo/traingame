@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"><meta name="theme-color" content="#080b17"><meta name="description" content="타워 하나만 지켜라. 클릭 없이 자동으로 폭발하는 3분 로그라이트."><title>LAST TOWER · OVERDRIVE</title><link rel="stylesheet" href="./style.css"></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"><meta name="theme-color" content="#080b17"><meta name="description" content="자동 전투, 고철 채굴, 즉시 구매, 영구 연구가 결합된 로그라이트 방치형 타워 게임."><title>LAST TOWER · IDLE FORGE</title><link rel="stylesheet" href="./style.css"></head>
 <body><div id="app"><main class="battle" aria-label="타워 디펜스 게임">
  <canvas id="game" aria-label="중앙 타워 자동 전투 화면"></canvas>
- <div class="ui top-ui"><div class="logo"><span class="logo-mark">◆</span><div><b>LAST <i>TOWER</i></b><small>OVERDRIVE</small></div></div>
+ <div class="ui top-ui"><div class="logo"><span class="logo-mark">◆</span><div><b>LAST <i>TOWER</i></b><small>IDLE FORGE</small></div></div>
  <div class="wave-box"><div class="wave-caption"><span id="waveLabel">WAVE 01</span><span id="waveTime">00:00</span></div><div class="progress-track"><div class="progress-fill" id="waveProgress"></div></div></div>
  <div class="top-actions"><button id="soundBtn" class="icon-button" type="button" aria-label="소리 설정">♪<span class="slash">/</span></button><button id="pauseBtn" class="icon-button" type="button" aria-label="일시정지">Ⅱ</button></div></div>
- <div class="ui left-ui"><div class="mini-label">방어 기록</div><div class="score-value" id="scoreHud">0</div><div class="tiny-metrics"><span>처치 <b id="killHud">0</b></span><span class="split">/</span><span>최대 <b id="bestScore">0</b></span></div></div>
+ <div class="ui resource-ui"><span class="coin-count">⬡ <b id="coinHud">0</b></span><span class="income-count" id="incomeHud">+3/s</span><span class="shard-count">◆ <b id="shardHud">0</b></span></div><div class="ui left-ui"><div class="mini-label">SCORE <span id="chestHud">보급 0</span></div><div class="score-value" id="scoreHud">0</div><div class="tiny-metrics"><span>처치 <b id="killHud">0</b></span><span class="split">/</span><span>최대 <b id="bestScore">0</b></span></div></div>
  <div class="ui right-ui"><div class="phase" id="phaseChip">대기 중</div><div class="round-indicator">STAGE <b id="waveHud">01 <span>/ 12</span></b></div></div>
  <div id="comboView" class="combo-display" hidden><span>CHAIN KILL</span><strong id="comboN">×2</strong></div>
  <div id="frenzyView" class="frenzy-display" hidden>OVERDRIVE <span id="frenzyTime">5.0s</span></div>
@@ -13,7 +13,7 @@
  <div class="ui bottom-ui"><div class="core-strip"><div class="hp-top"><span>◆ CORE</span><strong id="hpNum">205 / 205</strong></div><div class="hp-track"><div class="hp-fill" id="hpBar"></div></div></div>
  <div class="build-strip" id="buildList" aria-label="장착된 능력"><span class="empty-build">웨이브를 통과하면 능력이 여기에 쌓입니다</span></div>
  <div class="heat-unit"><div class="heat-label"><span>자동 폭주</span><strong id="heatNumber">0%</strong></div><div class="heat-track"><div id="heatFill"></div></div></div></div>
- <div class="screen-tint" id="screenTint"></div><div class="overlay" id="overlay"><div class="modal start-modal" id="overlayContent"></div></div>
+ <div class="forge-dock ui"><div class="forge-head"><span>FIELD FORGE <small>고철로 즉시 강화</small></span><button id="autoForge" class="auto-forge" type="button">자동 구매 OFF</button></div><div class="forge-buttons" id="forgeButtons" aria-label="자동전투 중 장비 강화"></div></div><div class="screen-tint" id="screenTint"></div><div class="overlay" id="overlay"><div class="modal start-modal" id="overlayContent"></div></div>
  <div class="screen-grain" aria-hidden="true"></div>
  <div class="sr-only"><span id="statDmg"></span><span id="statSpeed"></span><span id="statShots"></span><span id="statCrit"></span><span id="buildCount"></span><span id="bestWave"></span><span id="boss4"></span><span id="boss8"></span><span id="boss12"></span></div>
 </main></div><script src="./game.js" defer></script></body></html>
