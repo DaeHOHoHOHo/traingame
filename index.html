@@ -197,7 +197,7 @@ function weatherText(){return({sun:'맑음',rain:'비',cloud:'흐림',snow:'눈'
 function sellAll(auto=false){let n=0,total=0;for(const key of Object.keys(CROPS)){const count=game.produce[key]||0;total+=count*CROPS[key].value;n+=count;game.produce[key]=0}game.gold+=total;game.earned+=total;
  if(!auto)say(n?`수확물 ${n}개 배송! +${money(total)}`:'창고에 판매할 작물이 없어.');if(n)chime(830);return total}
 function repay(amount){if(game.debt<=0){say('이미 모든 빚을 갚았어!');return}amount=Math.min(amount,game.gold,game.debt);if(amount<=0){say('상환할 돈이 부족해.');return}game.gold-=amount;game.debt-=amount;save();showDebt();if(game.debt===0){say('축하해! 빚을 모두 갚았어!');chime(1100);}else say(`${money(amount)} 상환 완료!`);refreshUI();}
-function buy(cost,callback){if(game.gold<cost){say('돈이 부족해.');return}game.gold-=cost;callback();chime(740);save();showShop();refreshUI();}
+function buy(cost,callback){if(game.gold<cost){say('돈이 부족해.');return}game.gold-=cost;callback();chime(740);save();drawTools();showShop();refreshUI();}
 function purchaseLand(d){buy(d.cost,()=>{game.ownedLand[d.id]=true;const [sx,sy,w,h]=d.rect;putRect(game.tiles,sx,sy,w,h,t=>{if(t.ground!=='water'){t.unlocked=true;t.blocked=false;t.deco=hash(sx+w,sy+h,Math.round(Math.random()*10000))<.12?'flower':null}});say(d.name+' 구역을 개방했어!')})}
 function itemHTML(title,desc,price,clickName,disabled=false){return `<article class="shopItem"><div><div class="shopName">${title}</div><div class="shopDesc">${desc}</div></div><button ${disabled?'disabled':''} data-act="${clickName}">${price}</button></article>`}
 function modal(title,kicker,html){$('modalTitle').textContent=title;$('modalKicker').textContent=kicker;$('modalBody').innerHTML=html;$('modal').classList.remove('hidden')}
@@ -217,7 +217,7 @@ function showShop(){let a='<div class="shopGrid"><section><h3 class="shopTitle">
   if(id.startsWith('seed_')){const key=id.slice(5);buy(CROPS[key].cost*5,()=>{game.bags[key]+=5;say(`${CROPS[key].name} 씨앗 5개 구매 완료!`)})}
   else if(id.startsWith('up_')){const key=id.slice(3),d={toolLv:620,waterLv:540,harvestLv:740}[key];if(game[key]<3)buy(d*game[key],()=>{game[key]++;say('도구 강화 완료!');drawTools()})}
   else if(id.startsWith('land_')){const l=LANDS.find(x=>x.id===id.slice(5));if(l&&!game.ownedLand[l.id])purchaseLand(l)}
-  else if(id.startsWith('machine_')){const key=id.slice(8);buy(MACHINES[key].cost,()=>{game.machInventory[key]++;tool=key;drawTools();say(`설치할 위치를 선택해 줘: ${MACHINES[key].name}`);$('modal').classList.add('hidden')})}
+  else if(id.startsWith('machine_')){const key=id.slice(8);buy(MACHINES[key].cost,()=>{game.machInventory[key]++;tool=key;drawTools();say(`설치할 위치를 선택해 줘: ${MACHINES[key].name}`);}) ;closeModal()}
   else if(id.startsWith('flag_')){const key=id.slice(5),cost={delivery:2800,seedSupply:3100,calendar:4700}[key];if(!game.flags[key])buy(cost,()=>{game.flags[key]=true;say('자동화 기능이 해금됐어!')})}
  });}
 function showDebt(){let txt=`<div class="debtBox"><div class="shopLabel">농장 장기 대출 잔액</div><strong>${money(game.debt)}</strong><p class="note">천천히 갚아도 괜찮아. 연체 벌금이나 게임 오버는 없어.<br>빚을 모두 갚으면 농장 확장에 집중할 수 있어.</p><div class="paymentButtons"><button data-pay="500">500G 상환</button><button data-pay="2000">2,000G 상환</button><button data-pay="all">가능한 만큼 상환</button></div></div>`;
