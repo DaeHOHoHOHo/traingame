@@ -20,6 +20,13 @@
 .sideInfo.minimized{height:49px;bottom:auto;overflow:hidden}
 .sideInfo.minimized section{display:none}
 
+/* v0.3 contract & farm management UI */
+.textLink{float:right;border:0;background:transparent;padding:0;color:#92733d;font-size:10px;text-decoration:underline;font-weight:800}
+.orderMini{display:flex;align-items:center;justify-content:space-between;gap:5px;padding:6px 5px;background:#fff7de;border-radius:6px;margin:4px 0;font-size:11px}
+.orderMini b{color:#987335;white-space:nowrap;font-size:10px}.orderMini.done{opacity:.5}
+.orderList{display:grid;gap:10px}.orderCard{display:flex;align-items:center;gap:12px;padding:14px;background:#fffaf0;border:2px solid #e5d2af;border-radius:12px}.orderIcon{font-size:30px}.orderCopy{flex:1}.orderCopy strong{display:block;font-size:15px}.orderCopy small{display:block;color:#907f63;font-size:11px;margin-top:3px}.orderCard>div:last-child{display:flex;flex-direction:column;gap:7px;align-items:flex-end}.orderCard button,.cropChoice{border:0;border-radius:8px;background:#719565;color:white;padding:9px 12px;font-weight:800}.orderCard button:disabled{background:#c9c3ab}.cropChoices{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.cropChoice{font-size:12px;background:#ebe0c9;color:#65563e}.cropChoice.chosen{background:#6c9660;color:white}.dockActions .actionOrder{background:#e7ca9a;border-color:#c8aa75}
+@media(max-width:720px){.orderCard{gap:5px;padding:8px}.orderIcon{font-size:22px}.orderCopy strong{font-size:12px}.orderCopy small{font-size:10px}.orderCard>div:last-child b{font-size:11px}.dockActions{gap:3px}.dockActions button{font-size:10px;min-width:0;padding:4px 2px}.orderCard button{font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -40,8 +47,9 @@
     <div class="sideTitle"><span>✦</span> 농장 장부 <button class="iconBtn" id="sideToggle" title="장부 접기">⌃</button></div>
     <section><div class="subTitle">씨앗 주머니</div><div id="seedSummary" class="kvList"></div></section>
     <section><div class="subTitle">수확 창고</div><div id="produceSummary" class="kvList"></div><button id="sellBtn" class="miniAction">수확물 모두 판매 <span>➜</span></button></section>
+    <section><div class="subTitle">마을 주문 <button class="textLink" id="orderSidebar">납품하기 ›</button></div><div id="orderSummary" class="kvList"></div></section>
     <section><div class="subTitle">농장 성장</div><div id="progressInfo" class="sideParagraph"></div><div id="goalBars"></div></section>
-    <section><div class="subTitle">자동화 설비</div><div id="machineSummary" class="kvList"></div></section>
+    <section><div class="subTitle">자동화 설비</div><div id="machineSummary" class="kvList"></div><button id="autoDayToggle" class="miniAction" disabled>자동 날짜 잠김</button></section>
   </aside>
 
   <div class="cameraTools">
@@ -53,6 +61,7 @@
   <footer class="dock">
     <div class="toolstrip" id="toolstrip"></div>
     <div class="dockActions">
+      <button id="orderBtn" class="actionOrder">주문 <span>✉</span></button>
       <button id="shopBtn" class="actionShop">상점 <span>▸</span></button>
       <button id="debtBtn">빚 상환</button>
       <button id="nextDayBtn" class="actionDay">다음 날 <span>☀</span></button>
@@ -93,7 +102,8 @@ const LANDS=[
 const MACHINES={
  sprinkler:{name:'스프링클러',emoji:'💦',cost:520,desc:'반경 3칸 자동 관수',range:3},
  seeder:{name:'자동 파종기',emoji:'🌾',cost:1700,desc:'반경 3칸에 순무 씨앗 심기',range:3},
- harvester:{name:'수확 드론',emoji:'🚜',cost:2550,desc:'반경 3칸 자동 수확',range:3}
+ harvester:{name:'수확 드론',emoji:'🚜',cost:2550,desc:'반경 3칸 자동 수확',range:3},
+ manager:{name:'농장 관리 허브',emoji:'🏡',cost:7200,desc:'반경 4칸 자동 개간·파종·관수·수확',range:4}
 };
 const MILESTONES=[
  {at:10,text:'첫 수확 10개',reward:60},
@@ -101,7 +111,7 @@ const MILESTONES=[
  {at:180,text:'누적 수확 180개',reward:650},
  {at:500,text:'누적 수확 500개',reward:1800}
 ];
-let game,tool='hoe',pointer=new Map(),panMoved=false,panAnchor=null,hover=null,toastUntil=0,last=0,lastPaint=0,clockAcc=0,uiAcc=0,saveAcc=0,timeAcc=0,audioOn=false,audioCtx=null;
+let game,tool='hoe',effects=[],pointer=new Map(),panMoved=false,panAnchor=null,hover=null,toastUntil=0,last=0,lastPaint=0,clockAcc=0,uiAcc=0,saveAcc=0,timeAcc=0,audioOn=false,audioCtx=null;
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const money=n=>Math.round(n).toLocaleString('ko-KR')+' G';
@@ -128,11 +138,12 @@ function makeMap(){
  putRect(tiles,36,39,6,4,(t,x,y)=>{t.tilled=true;t.ground='grass';t.blocked=false;t.deco=null;t.watered=false;if((x+y)%5===0)t.crop={type:'turnip',progress:1,ready:false};});
  return tiles;
 }
-function fresh(){return {version:2,gold:420,debt:6500,day:1,weather:'sun',time:6,season:'봄',tiles:makeMap(),bags:{turnip:14,potato:3,strawberry:0,tomato:0,pumpkin:0,blueberry:0},produce:Object.fromEntries(Object.keys(CROPS).map(x=>[x,0])),toolLv:1,waterLv:1,harvestLv:1,structures:[],machInventory:{sprinkler:0,seeder:0,harvester:0},ownedLand:{},flags:{delivery:false,seedSupply:false,calendar:false},totalHarvests:0,autoHarvests:0,earned:0,rewarded:[],focus:{x:49,y:48,zoom:1.16},autoDayClock:0,started:Date.now()};}
+function fresh(){return {version:3,gold:420,debt:6500,day:1,weather:'sun',time:6,season:'봄',tiles:makeMap(),bags:{turnip:14,potato:3,strawberry:0,tomato:0,pumpkin:0,blueberry:0},produce:Object.fromEntries(Object.keys(CROPS).map(x=>[x,0])),toolLv:1,waterLv:1,harvestLv:1,structures:[],machInventory:{sprinkler:0,seeder:0,harvester:0,manager:0},ownedLand:{},flags:{delivery:false,seedSupply:false,calendar:false,preserves:false},totalHarvests:0,autoHarvests:0,earned:0,rewarded:[],focus:{x:42.5,y:43.5,zoom:1.12},autoDayClock:0,orders:makeOrders(1),completedOrders:0,reputation:0,managerCrop:'turnip',autoPaused:false,started:Date.now()};}
 function load(){try{const saved=localStorage.getItem(KEY);if(!saved)return fresh();const s=JSON.parse(saved);if(!Array.isArray(s.tiles)||s.tiles.length!==S)return fresh();
- const base=fresh();const old=s.version!==2;
+ const base=fresh();const old=(s.version||1)<2;
  base.gold=Number.isFinite(s.gold)?s.gold:420;base.debt=Number.isFinite(s.debt)?s.debt:6500;base.day=s.day||1;base.tiles=s.tiles;
  base.ownedLand=s.ownedLand||{};base.structures=Array.isArray(s.structures)?s.structures:[];base.totalHarvests=s.totalHarvests||0;base.autoHarvests=s.autoHarvests||s.totalAutomationHarvests||0;
+ base.orders=Array.isArray(s.orders)?s.orders:makeOrders(base.day);base.completedOrders=s.completedOrders||0;base.reputation=s.reputation||0;base.managerCrop=CROPS[s.managerCrop]?s.managerCrop:'turnip';base.autoPaused=!!s.autoPaused;
  base.earned=s.earned||0;base.rewarded=s.rewarded||[];base.flags={...base.flags,...s.flags};base.focus=s.focus||base.focus;
  if(!old){base.bags={...base.bags,...s.bags};base.produce={...base.produce,...s.produce};base.toolLv=s.toolLv||1;base.waterLv=s.waterLv||1;base.harvestLv=s.harvestLv||1;base.machInventory={...base.machInventory,...s.machInventory};base.autoDayClock=s.autoDayClock||0;}
  else{ // Previous farming prototype migration: keep money, debt, plots, crops, machines and seeds.
@@ -143,7 +154,7 @@ function load(){try{const saved=localStorage.getItem(KEY);if(!saved)return fresh
    base.focus={x:48,y:48,zoom:1.16};
  }
  for(const row of base.tiles)for(const t of row){if(t){if(!('crop' in t))t.crop=null;if(!('structure'in t))t.structure=null;if(!('watered'in t))t.watered=false;if(!('tilled'in t))t.tilled=false;}}
- base.version=2;base.season=seasonOf(base.day);return base;
+ base.version=3;base.season=seasonOf(base.day);return base;
 }catch(e){console.warn('save recovery',e);return fresh();}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(game))}catch(e){console.warn('Autosave unavailable',e)}}
 function seasonOf(day){return ['봄','여름','가을','겨울'][Math.floor((day-1)/12)%4];}
@@ -173,23 +184,60 @@ function perform(x,y,quiet=false){const t=tile(x,y);if(!t||!t.unlocked){if(!quie
    else if(tool==='clear'){if(tt&&tt.unlocked&&tt.deco&&tt.ground!=='water'&&!tt.structure){tt.deco=null;tt.blocked=false;game.gold+=3;applied++}}
    else if(Object.hasOwn(CROPS,tool)){if(sow(tt,tool))applied++}
  });
- if(applied){chime(tool==='harvest'?730:410);if(tool==='harvest'&&applied>1)say(`${applied}개 한꺼번에 수확!`);return true}
+ if(applied){chime(tool==='harvest'?730:410);if(tool==='harvest'){floatText(x,y,`+${applied} 수확`);if(applied>1)say(`${applied}개 한꺼번에 수확!`);}return true}
  if(!quiet){if(Object.hasOwn(CROPS,tool)&&!game.bags[tool])say(`${CROPS[tool].name} 씨앗이 없어. 상점에서 구입해 줘.`);else if(tool==='harvest')say('아직 다 자란 작물이 없어.');else say('해당 위치에는 작업할 수 없어.');}
  return false;
+}
+// Stable per-day town deliveries: optional bonuses, never a fail state.
+function makeOrders(day,reputation=0){
+ const available=day<5?['turnip']:day<10?['turnip','potato']:day<18?['turnip','potato','strawberry','tomato']:Object.keys(CROPS);
+ return [0,1].map(i=>{const key=available[Math.floor(hash(day,i,25)*available.length)];const count=3+Math.floor(hash(i,day,17)*4)+(day>12?2:0);return {id:`${day}-${i}`,type:key,count,reward:Math.round(CROPS[key].value*count*(1.45+hash(day,i,31)*.3)*(1+Math.floor(reputation/5)*.08)),done:false};});
+}
+function fulfillOrder(index){const order=game.orders[index];if(!order||order.done)return;const n=game.produce[order.type]||0;
+ if(n<order.count){say(`수확 창고에 ${CROPS[order.type].name} ${order.count-n}개가 더 필요해.`);return;}
+ game.produce[order.type]-=order.count;game.gold+=order.reward;game.earned+=order.reward;game.reputation++;game.completedOrders++;order.done=true;
+ floatText(49,49,`주문 +${money(order.reward)}`);say(`납품 성공! +${money(order.reward)} · 마을 평판 +1`);chime(890);save();showOrders();refreshUI();
+}
+function showOrders(){const rows=game.orders.map((o,i)=>{const c=CROPS[o.type],n=game.produce[o.type]||0;
+ return `<article class="orderCard"><div class="orderIcon">${c.emoji}</div><div class="orderCopy"><strong>${c.name} ${o.count}개 납품</strong><small>창고 ${n}/${o.count}개 · 일반 판매보다 높은 보상</small></div><div><b>${money(o.reward)}</b><button data-order="${i}" ${o.done||n<o.count?'disabled':''}>${o.done?'완료':'납품하기'}</button></div></article>`}).join('');
+ modal('마을 주문 게시판',`${game.day}일차 · 매일 새 주문 · 마을 평판 ${game.reputation}`,`<p class="note">서두를 필요 없어요. 주문은 매일 새로 들어오고, 미완료 주문에 벌금은 없습니다. 마을 평판 5마다 다음 주문 보상이 8%씩 증가합니다.</p><div class="orderList">${rows}</div><p class="note">수확물은 먼저 창고에 쌓여요. 주문 납품, 일반 판매 또는 가공으로 활용할 수 있습니다.</p>`);
+ $('modalBody').querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>fulfillOrder(Number(b.dataset.order)));
+}
+function processPreserves(){if(!game.flags.preserves)return 0;let revenue=0,processed=0;
+ // Keep enough produce for active orders before processing surplus.
+ for(const [key,d] of Object.entries(CROPS)){const reserved=game.orders.filter(o=>!o.done&&o.type===key).reduce((n,o)=>n+o.count,0);const surplus=Math.max(0,(game.produce[key]||0)-reserved);
+ const qty=Math.min(surplus,8-processed);if(qty<=0)continue;
+ game.produce[key]-=qty;processed+=qty;revenue+=Math.floor(qty*d.value*1.8);if(processed>=8)break;
+ }
+ if(revenue){game.gold+=revenue;game.earned+=revenue;floatText(49,49,`가공 +${money(revenue)}`);}return revenue;
+}
+function floatText(x,y,message){effects.push({x,y,text:message,created:performance.now()});if(effects.length>36)effects.shift()}
+function maintainField(m){let jobs=0,planted=0;
+ // A late-game field controller handles planting, irrigation, and harvesting within 9x9.
+ forRange(m.x,m.y,MACHINES.manager.range,(t,x,y)=>{if(!t||!t.unlocked||t.ground==='water'||t.blocked||t.structure)return;
+ if(t.crop){t.watered=true;return;}if(jobs>=16)return;
+ if(!t.tilled){t.tilled=true;t.deco=null;}
+ const seed=game.managerCrop,d=CROPS[seed];
+ if(!game.bags[seed]){if(game.gold<d.cost+30)return;game.gold-=d.cost;game.bags[seed]++;}
+ if(sow(t,seed)){jobs++;planted++;}
+ });return planted;
 }
 function waterAround(t,x,y){forRange(x,y,3,(a)=>{if(a&&a.unlocked&&(a.tilled||a.crop))a.watered=true})}
 function runAutomations(){
  if(game.weather==='rain')for(const row of game.tiles)for(const t of row)if(t?.crop||t?.tilled)t.watered=true;
  for(const m of game.structures)if(m.type==='sprinkler')waterAround(tile(m.x,m.y),m.x,m.y);
+ for(const m of game.structures)if(m.type==='manager')forRange(m.x,m.y,4,t=>{if(t&&(t.tilled||t.crop))t.watered=true;});
  // Growth comes before harvest, then replant. Only adjacent automation zones are affected.
  for(const row of game.tiles)for(const t of row)if(t?.crop){const c=t.crop;const d=CROPS[c.type];if(!d)continue;if(!c.ready){c.progress+=t.watered?1.48:.75;if(c.progress>=d.days)c.ready=true;}}
- for(const m of game.structures)if(m.type==='harvester')forRange(m.x,m.y,3,t=>harvest(t,true));
+ for(const m of game.structures)if(m.type==='harvester'||m.type==='manager')forRange(m.x,m.y,m.type==='manager'?4:3,t=>harvest(t,true));
  if(game.flags.seedSupply&&game.bags.turnip<12&&game.gold>=210){game.bags.turnip+=14;game.gold-=210;}
  for(const m of game.structures)if(m.type==='seeder')forRange(m.x,m.y,3,t=>sow(t,'turnip'));
+ for(const m of game.structures)if(m.type==='manager')maintainField(m);
+ processPreserves();
  if(game.flags.delivery)sellAll(true);
  for(const row of game.tiles)for(const t of row)if(t)t.watered=false;
 }
-function newDay(){game.day++;game.season=seasonOf(game.day);const r=Math.random();game.weather=game.season==='겨울'?(r<.25?'snow':r<.5?'rain':'sun'):(r<.18?'rain':r<.28?'cloud':'sun');runAutomations();
+function newDay(){game.day++;game.orders=makeOrders(game.day,game.reputation);game.season=seasonOf(game.day);const r=Math.random();game.weather=game.season==='겨울'?(r<.25?'snow':r<.5?'rain':'sun'):(r<.18?'rain':r<.28?'cloud':'sun');runAutomations();
  if(game.debt===0&&!game.flags.debtParty){game.flags.debtParty=true;game.gold+=1000;say('빚 완납! 마을에서 축하 선물 1,000G를 보냈어!')}
  else say(`${game.season} ${game.day}일차 · ${weatherText()} · 농장이 하루 자랐어.`);
  game.autoDayClock=0;chime(660);save();refreshUI();}
@@ -209,8 +257,10 @@ function showShop(){let a='<div class="shopGrid"><section><h3 class="shopTitle">
  for(const l of LANDS){const bought=!!game.ownedLand[l.id];a+=itemHTML(l.name,l.desc,bought?'구매 완료':money(l.cost),'land_'+l.id,bought||game.gold<l.cost)}
  a+='<h3 class="shopTitle">⚙ 농장 자동화</h3>';
  for(const [k,m] of Object.entries(MACHINES)){a+=itemHTML(`${m.emoji} ${m.name}`,m.desc, money(m.cost),'machine_'+k,game.gold<m.cost)}
- const perks=[['delivery','자동 출하소','매일 창고의 수확물 자동 판매',2800],['seedSupply','씨앗 정기배송','매일 부족한 순무 씨앗 자동 구매',3100],['calendar','자동 날짜 진행','약 30초마다 새날 · 방치형 운영',4700]];
+ const perks=[['delivery','자동 출하소','매일 창고의 수확물 자동 판매 (납품·가공할 물품도 판매됨)',2800],['seedSupply','씨앗 정기배송','매일 부족한 순무 씨앗 자동 구매',3100],['calendar','자동 날짜 진행','약 30초마다 새날 · 방치형 운영',4700],['preserves','작물 가공 공방','매일 주문 물량을 제외한 최대 8개를 1.8배 가치로 가공 판매',3200]];
  for(const [k,n,d,c] of perks)a+=itemHTML(n,d,game.flags[k]?'해금됨':money(c),'flag_'+k,game.flags[k]||game.gold<c);
+ a+='<h3 class="shopTitle">🌿 자동 농장 허브 재배 작물</h3><p class="note">허브는 선택한 씨앗을 자동 구매해 파종합니다. 부족한 돈까지 사용하지는 않습니다.</p><div class="cropChoices">';
+ for(const [k,d] of Object.entries(CROPS))a+=`<button class="cropChoice ${game.managerCrop===k?'chosen':''}" data-act="crop_${k}">${d.emoji} ${d.name}</button>`;a+='</div>';
  a+='</section></div>';modal('농장 상점','달빛마을 씨앗과 도구',a);
  $('modalBody').querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
   const id=b.dataset.act;
@@ -218,7 +268,8 @@ function showShop(){let a='<div class="shopGrid"><section><h3 class="shopTitle">
   else if(id.startsWith('up_')){const key=id.slice(3),d={toolLv:620,waterLv:540,harvestLv:740}[key];if(game[key]<3)buy(d*game[key],()=>{game[key]++;say('도구 강화 완료!');drawTools()})}
   else if(id.startsWith('land_')){const l=LANDS.find(x=>x.id===id.slice(5));if(l&&!game.ownedLand[l.id])purchaseLand(l)}
   else if(id.startsWith('machine_')){const key=id.slice(8);buy(MACHINES[key].cost,()=>{game.machInventory[key]++;tool=key;drawTools();say(`설치할 위치를 선택해 줘: ${MACHINES[key].name}`);}) ;closeModal()}
-  else if(id.startsWith('flag_')){const key=id.slice(5),cost={delivery:2800,seedSupply:3100,calendar:4700}[key];if(!game.flags[key])buy(cost,()=>{game.flags[key]=true;say('자동화 기능이 해금됐어!')})}
+  else if(id.startsWith('flag_')){const key=id.slice(5),cost={delivery:2800,seedSupply:3100,calendar:4700,preserves:3200}[key];if(!game.flags[key])buy(cost,()=>{game.flags[key]=true;say('자동화 기능이 해금됐어!')})}
+  else if(id.startsWith('crop_')){const key=id.slice(5);if(CROPS[key]){game.managerCrop=key;save();say(`허브 작물을 ${CROPS[key].name}(으)로 설정했어.`);showShop();}}
  });}
 function showDebt(){let txt=`<div class="debtBox"><div class="shopLabel">농장 장기 대출 잔액</div><strong>${money(game.debt)}</strong><p class="note">천천히 갚아도 괜찮아. 연체 벌금이나 게임 오버는 없어.<br>빚을 모두 갚으면 농장 확장에 집중할 수 있어.</p><div class="paymentButtons"><button data-pay="500">500G 상환</button><button data-pay="2000">2,000G 상환</button><button data-pay="all">가능한 만큼 상환</button></div></div>`;
  modal('농장 빚 상환','작은 성취가 쌓이면 농장도 자라요',txt);
@@ -232,9 +283,11 @@ function refreshUI(){
  $('gold').textContent=money(game.gold);$('debt').textContent=money(game.debt);$('day').textContent=`${game.day}일차`;$('weather').textContent=`${game.season} · ${weatherText()}`;
  $('seedSummary').innerHTML=Object.entries(CROPS).filter(([k])=>game.bags[k]>0||['turnip','potato'].includes(k)).map(([k,v])=>row(v.emoji+' '+v.name,game.bags[k]+'개')).join('');
  $('produceSummary').innerHTML=Object.entries(CROPS).filter(([k])=>game.produce[k]>0).map(([k,v])=>row(v.emoji+' '+v.name,game.produce[k]+'개')).join('')||'<div class="sideParagraph">아직 수확물이 없어요.</div>';
- $('machineSummary').innerHTML=Object.entries(MACHINES).map(([k,m])=>row(m.emoji+' '+m.name,game.structures.filter(x=>x.type===k).length+'대')).join('')+row('자동 출하',game.flags.delivery?'작동 중':'미구매')+row('자동 날짜',game.flags.calendar?'작동 중':'미구매');
+ $('machineSummary').innerHTML=Object.entries(MACHINES).map(([k,m])=>row(m.emoji+' '+m.name,game.structures.filter(x=>x.type===k).length+'대')).join('')+row('자동 출하',game.flags.delivery?'작동 중':'미구매')+row('자동 날짜',game.flags.calendar?(game.autoPaused?'일시정지':'작동 중'):'미구매')+row('가공 공방',game.flags.preserves?'작동 중':'미구매');
+ $('orderSummary').innerHTML=game.orders.map(o=>`<div class="orderMini ${o.done?'done':''}"><span>${CROPS[o.type].emoji} ${CROPS[o.type].name} ${Math.min(game.produce[o.type]||0,o.count)}/${o.count}</span><b>${o.done?'완료':money(o.reward)}</b></div>`).join('');
+ $('autoDayToggle').textContent=game.flags.calendar?(game.autoPaused?'자동 날짜 ▶ 재개':'자동 날짜 Ⅱ 정지'):'자동 날짜 잠김';$('autoDayToggle').disabled=!game.flags.calendar;
  const debtRate=clamp((6500-game.debt)/6500*100,0,100);$('progressInfo').innerHTML=game.debt?'농사를 지어 빚을 갚고, 큰 농장을 차근차근 개척해 보세요.':'대출 완납! 이제 커다란 자동화 농장으로 성장해 보세요.';
- $('goalBars').innerHTML=`<div class="kv"><span>대출 상환</span><strong>${debtRate.toFixed(0)}%</strong></div><div class="goalBar"><div style="width:${debtRate}%"></div></div>`+row('누적 수확',game.totalHarvests+'개')+row('총 판매',money(game.earned));
+ $('goalBars').innerHTML=`<div class="kv"><span>대출 상환</span><strong>${debtRate.toFixed(0)}%</strong></div><div class="goalBar"><div style="width:${debtRate}%"></div></div>`+row('누적 수확',game.totalHarvests+'개')+row('마을 평판',game.reputation+'점')+row('총 판매',money(game.earned));
 }
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=Math.floor(innerWidth*dpr);canvas.height=Math.floor(innerHeight*dpr);canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;}
 function getScreen(x,y){const z=T*game.focus.zoom;return{x:(x-game.focus.x)*z+innerWidth/2,y:(y-game.focus.y)*z+innerHeight/2};}
@@ -260,8 +313,9 @@ function hookInput(){
  canvas.addEventListener('pointercancel',e=>pointer.delete(e.pointerId));
  canvas.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.13:.885,e.clientX,e.clientY)},{passive:false});
  canvas.addEventListener('contextmenu',e=>e.preventDefault());
- $('zoomIn').onclick=()=>zoomAt(1.2);$('zoomOut').onclick=()=>zoomAt(.84);$('homeCam').onclick=()=>{game.focus.x=49;game.focus.y=48;game.focus.zoom=1.16};
- $('shopBtn').onclick=showShop;$('debtBtn').onclick=showDebt;$('nextDayBtn').onclick=newDay;$('sellBtn').onclick=()=>{sellAll();refreshUI();save()};
+ $('zoomIn').onclick=()=>zoomAt(1.2);$('zoomOut').onclick=()=>zoomAt(.84);$('homeCam').onclick=()=>{game.focus.x=41;game.focus.y=43;game.focus.zoom=1.12};
+ $('shopBtn').onclick=showShop;$('debtBtn').onclick=showDebt;$('nextDayBtn').onclick=newDay;$('orderBtn').onclick=showOrders;$('sellBtn').onclick=()=>{sellAll();refreshUI();save()};
+ $('autoDayToggle').onclick=()=>{if(!game.flags.calendar)return;game.autoPaused=!game.autoPaused;save();refreshUI();};$('orderSidebar').onclick=showOrders;
  $('audioToggle').onclick=()=>{audioOn=!audioOn;$('audioToggle').textContent=audioOn?'♫':'♪';if(audioOn)chime(770)};
  $('closeModal').onclick=closeModal;$('modal').querySelector('[data-close]').onclick=closeModal;
  $('sideToggle').onclick=()=>{$('sideInfo').classList.toggle('minimized');$('sideToggle').textContent=$('sideInfo').classList.contains('minimized')?'⌄':'⌃'};
@@ -276,7 +330,7 @@ function drawCrop(t,x,y){const c=t.crop;if(!c)return;const d=CROPS[c.type];if(!d
  if(stage>=3){px(x+11,y+15,10,11,d.fruit);if(c.type==='turnip'){px(x+13,y+21,8,5,'#dfc9c5')}if(c.type==='strawberry')px(x+13,y+17,3,3,'#ffcd98');if(c.type==='pumpkin'){px(x+8,y+12,19,14,d.fruit);px(x+15,y+9,5,4,'#4a7839')}}
  if(c.ready){px(x+12,y+2,3,3,'#fff0ae');px(x+17,y+1,4,4,'#fdfbdf');px(x+19,y+7,3,3,'#ffe5a1')}
 }
-function structureSprite(type,x,y){const a=type==='sprinkler';if(a){px(x+13,y+8,6,18,'#667b83');px(x+7,y+8,19,5,'#b9e3e9');px(x+15,y+5,3,5,'#e4f9ff');px(x+5,y+19,5,3,'#83d8f6');px(x+25,y+17,4,4,'#88d9ef')}else if(type==='seeder'){px(x+7,y+10,19,16,'#a86a38');px(x+9,y+5,15,9,'#d9b96c');px(x+11,y+12,10,7,'#724d2f');px(x+5,y+24,6,5,'#665d57');px(x+22,y+24,6,5,'#665d57')}else{px(x+6,y+10,21,13,'#c7d2d5');px(x+9,y+5,14,10,'#8097a9');px(x+12,y+8,8,4,'#c1eafa');px(x+4,y+21,8,7,'#575655');px(x+22,y+21,8,7,'#575655');px(x+25,y+14,6,3,'#e4ad56')}}
+function structureSprite(type,x,y){const a=type==='sprinkler';if(type==='manager'){px(x+2,y+13,29,17,'#81573c');px(x+5,y+3,23,14,'#cd9560');px(x+8,y+0,16,6,'#8b6b7c');px(x+12,y+17,10,12,'#ded1a5');px(x+13,y+7,6,5,'#b6decd');px(x+1,y+26,31,4,'#d9bf82')}else if(a){px(x+13,y+8,6,18,'#667b83');px(x+7,y+8,19,5,'#b9e3e9');px(x+15,y+5,3,5,'#e4f9ff');px(x+5,y+19,5,3,'#83d8f6');px(x+25,y+17,4,4,'#88d9ef')}else if(type==='seeder'){px(x+7,y+10,19,16,'#a86a38');px(x+9,y+5,15,9,'#d9b96c');px(x+11,y+12,10,7,'#724d2f');px(x+5,y+24,6,5,'#665d57');px(x+22,y+24,6,5,'#665d57')}else{px(x+6,y+10,21,13,'#c7d2d5');px(x+9,y+5,14,10,'#8097a9');px(x+12,y+8,8,4,'#c1eafa');px(x+4,y+21,8,7,'#575655');px(x+22,y+21,8,7,'#575655');px(x+25,y+14,6,3,'#e4ad56')}}
 function drawHouse(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.shadowColor='rgba(24,41,23,.2)';ctx.shadowBlur=4;px(1,26,32*7-2,32*6-24,'#b6a476');ctx.shadowBlur=0;px(7,51,200,104,'#e4c08d');px(15,61,184,83,'#eacb9e');px(0,50,224,19,'#6b744b');px(11,26,202,29,'#b8664f');px(20,8,184,28,'#bf7252');px(35,0,148,15,'#d68b5a');for(let i=0;i<11;i++){px(13+i*18,31+(i%2)*2,10,3,'#e3a17b')}px(85,96,43,59,'#805e4b');px(92,105,29,49,'#aa8155');px(143,86,41,38,'#8cb2b3');px(147,90,33,30,'#c6e6dc');px(14,86,42,38,'#8cb2b3');px(18,90,34,30,'#c7e7dc');px(34,88,4,36,'#7d745f');px(160,88,4,36,'#7d745f');px(99,126,5,5,'#f6d69a');ctx.restore()}
 function drawBarn(x,y){ctx.save();ctx.translate(Math.round(x),Math.round(y));px(0,55,8*32,6*32-55,'#a75d42');px(13,69,230,105,'#c57a54');px(11,45,236,24,'#e9c092');px(40,0,168,52,'#9d624c');px(11,25,226,31,'#ba764e');px(75,92,85,82,'#77563e');px(89,105,56,69,'#e0c498');px(111,105,6,69,'#926945');px(185,90,33,36,'#a7ced2');px(194,90,4,36,'#7e8f84');px(29,91,34,37,'#a7ced2');ctx.restore()}
 function tileSprite(t,wx,wy,x,y,z){ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(z/32,z/32);
@@ -302,12 +356,16 @@ function render(){const w=innerWidth,h=innerHeight,z=T*game.focus.zoom;ctx.fillS
  for(const obj of houses){const a=getScreen(obj.x,obj.y);if(a.x>-400&&a.x<w+100&&a.y>-300&&a.y<h+150){ctx.save();ctx.translate(Math.round(a.x),Math.round(a.y));ctx.scale(z/32,z/32);obj.draw(0,0);ctx.restore()}}
  // boundary posts around the starting area
  for(let x=31;x<=67;x++){for(const y of [33,65]){const a=getScreen(x,y);if(a.x>=-50&&a.x<w+50&&a.y>=-50&&a.y<h+50){ctx.fillStyle='#d9bf8b';ctx.fillRect(a.x,a.y,Math.max(2,z*.1),Math.max(4,z*.35))}}}
+ // Show automation coverage before placement, so large farms are easier to plan.
+ if(hover&&Object.hasOwn(MACHINES,tool)&&game.machInventory[tool]>0){const range=MACHINES[tool].range;const z=T*game.focus.zoom;const corner=getScreen(hover.x-range,hover.y-range);ctx.fillStyle='rgba(243,228,139,.105)';ctx.fillRect(corner.x,corner.y,(range*2+1)*z,(range*2+1)*z);ctx.strokeStyle='rgba(249,228,141,.8)';ctx.setLineDash([8,5]);ctx.lineWidth=2;ctx.strokeRect(corner.x,corner.y,(range*2+1)*z,(range*2+1)*z);ctx.setLineDash([]);}
+ // Floating harvest numbers add immediate feedback without hiding crops.
+ effects=effects.filter(f=>performance.now()-f.created<1450);for(const e of effects){const age=(performance.now()-e.created)/1450;const a=getScreen(e.x,e.y);ctx.save();ctx.globalAlpha=1-age;ctx.textAlign='center';ctx.font='bold 14px system-ui';ctx.strokeStyle='#3e5530';ctx.lineWidth=3;ctx.strokeText(e.text,a.x,a.y-age*45);ctx.fillStyle='#fff0ab';ctx.fillText(e.text,a.x,a.y-age*45);ctx.restore();}
  if(hover&&hover.x>=0&&hover.y>=0&&hover.x<S&&hover.y<S){const a=getScreen(hover.x,hover.y);const t=tile(hover.x,hover.y);ctx.strokeStyle=t?.unlocked?'rgba(255,255,226,.98)':'rgba(249,162,131,.95)';ctx.lineWidth=2;ctx.strokeRect(Math.round(a.x)+1,Math.round(a.y)+1,z-2,z-2)}
  if(game.weather==='rain'){ctx.fillStyle='rgba(59,90,108,.06)';ctx.fillRect(0,0,w,h);for(let i=0;i<80;i++){const xx=(hash(i,game.day,1)*w+(performance.now()*.11*(i%3+1)))%w,yy=(hash(i,game.day,2)*h+performance.now()*.26*(1+i%3))%h;ctx.fillStyle='rgba(218,236,245,.37)';ctx.fillRect(xx,yy,1,8)}}
  if(game.season==='겨울'){ctx.fillStyle='rgba(230,246,238,.12)';ctx.fillRect(0,0,w,h)}
 }
 function animate(ts){if(!last)last=ts;const dt=Math.min(.05,(ts-last)/1000);last=ts;timeAcc+=dt;uiAcc+=dt;saveAcc+=dt;
- if(game.flags.calendar&&$('modal').classList.contains('hidden')){game.autoDayClock+=dt;if(game.autoDayClock>=31)newDay()}
+ if(game.flags.calendar&&!game.autoPaused&&$('modal').classList.contains('hidden')){game.autoDayClock+=dt;if(game.autoDayClock>=31)newDay()}
  if(uiAcc>.24){refreshUI();uiAcc=0}if(saveAcc>8){save();saveAcc=0}
  if(toastUntil&&ts>toastUntil){$('toast').classList.remove('show');toastUntil=0}
  if(ts-lastPaint>35){render();lastPaint=ts}requestAnimationFrame(animate)}
