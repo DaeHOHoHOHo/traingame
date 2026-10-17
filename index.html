@@ -1,19 +1,48 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"><meta name="theme-color" content="#080b17"><meta name="description" content="자동 전투, 고철 채굴, 즉시 구매, 영구 연구가 결합된 로그라이트 방치형 타워 게임."><title>LAST TOWER · IDLE FORGE</title><link rel="stylesheet" href="./style.css"></head>
-<body><div id="app"><main class="battle" aria-label="타워 디펜스 게임">
- <canvas id="game" aria-label="중앙 타워 자동 전투 화면"></canvas>
- <div class="ui top-ui"><div class="logo"><span class="logo-mark">◆</span><div><b>LAST <i>TOWER</i></b><small>IDLE FORGE</small></div></div>
- <div class="wave-box"><div class="wave-caption"><span id="waveLabel">WAVE 01</span><span id="waveTime">00:00</span></div><div class="progress-track"><div class="progress-fill" id="waveProgress"></div></div></div>
- <div class="top-actions"><button id="soundBtn" class="icon-button" type="button" aria-label="소리 설정">♪<span class="slash">/</span></button><button id="pauseBtn" class="icon-button" type="button" aria-label="일시정지">Ⅱ</button></div></div>
- <div class="ui resource-ui"><span class="coin-count">⬡ <b id="coinHud">0</b></span><span class="income-count" id="incomeHud">+3/s</span><span class="shard-count">◆ <b id="shardHud">0</b></span></div><div class="ui left-ui"><div class="mini-label">SCORE <span id="chestHud">보급 0</span></div><div class="score-value" id="scoreHud">0</div><div class="tiny-metrics"><span>처치 <b id="killHud">0</b></span><span class="split">/</span><span>최대 <b id="bestScore">0</b></span></div></div>
- <div class="ui right-ui"><div class="phase" id="phaseChip">대기 중</div><div class="round-indicator">STAGE <b id="waveHud">01 <span>/ 12</span></b></div></div>
- <div id="comboView" class="combo-display" hidden><span>CHAIN KILL</span><strong id="comboN">×2</strong></div>
- <div id="frenzyView" class="frenzy-display" hidden>OVERDRIVE <span id="frenzyTime">5.0s</span></div>
- <div class="float-announcement" id="announcement" aria-live="polite"></div>
- <div class="ui bottom-ui"><div class="core-strip"><div class="hp-top"><span>◆ CORE</span><strong id="hpNum">205 / 205</strong></div><div class="hp-track"><div class="hp-fill" id="hpBar"></div></div></div>
- <div class="build-strip" id="buildList" aria-label="장착된 능력"><span class="empty-build">웨이브를 통과하면 능력이 여기에 쌓입니다</span></div>
- <div class="heat-unit"><div class="heat-label"><span>자동 폭주</span><strong id="heatNumber">0%</strong></div><div class="heat-track"><div id="heatFill"></div></div></div></div>
- <div class="forge-dock ui"><div class="forge-head"><span>FIELD FORGE <small>고철로 즉시 강화</small></span><button id="autoForge" class="auto-forge" type="button">자동 구매 OFF</button></div><div class="forge-buttons" id="forgeButtons" aria-label="자동전투 중 장비 강화"></div></div><div class="screen-tint" id="screenTint"></div><div class="overlay" id="overlay"><div class="modal start-modal" id="overlayContent"></div></div>
- <div class="screen-grain" aria-hidden="true"></div>
- <div class="sr-only"><span id="statDmg"></span><span id="statSpeed"></span><span id="statShots"></span><span id="statCrit"></span><span id="buildCount"></span><span id="bestWave"></span><span id="boss4"></span><span id="boss8"></span><span id="boss12"></span></div>
-</main></div><script src="./game.js" defer></script></body></html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07121f">
+<meta name="description" content="심해에서 보물을 인양하고 계약을 완수하며 크레인을 강화하는 무료 브라우저 로그라이트 게임">
+<title>DEEP SALVAGE — 심해 인양 계약</title>
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="brandicon">◈</span><div><b>DEEP <em>SALVAGE</em></b><small>심해 인양 계약 <span class="beta">v1.0</span></small></div></div>
+    <div class="metrics">
+      <div class="metric"><span>계약</span><b id="dayStat">01 / 05</b></div>
+      <div class="metric"><span>남은 시간</span><b id="timerStat">1:20</b></div>
+      <div class="metric gold"><span>보유 크레딧</span><b id="walletStat">0</b></div>
+    </div>
+    <div class="top-actions"><button id="audioBtn" class="icon-btn" aria-label="사운드 켜기/끄기" title="사운드 켜기/끄기">♪</button><button id="pauseBtn" class="icon-btn" aria-label="일시정지" title="일시정지 / P">Ⅱ</button></div>
+  </header>
+  <main id="arena" class="arena">
+    <canvas id="gameCanvas" aria-label="심해 인양 플레이 화면"></canvas>
+    <div class="top-overlay">
+      <div class="contract-card">
+        <div class="contract-heading"><div><span class="eyebrow">TODAY'S CONTRACT</span><strong id="contractName">침몰한 잔해</strong></div><div class="target" id="targetStat">0 / 320</div></div>
+        <div class="progress"><span id="quotaProgress"></span></div>
+        <div class="info-row"><span id="contractHint">획득한 화물을 선상으로 끌어올리세요</span><span id="depthStat">깊이 0m</span></div>
+      </div>
+      <div class="cargo-card"><div class="cargo-top"><span>인양 화물</span><b id="cargoStat">0 / 6.0t</b></div><div class="progress cargo-progress"><span id="cargoProgress"></span></div><div class="cargo-bottom" id="cargoValue">예상 수익 +0</div></div>
+    </div>
+    <div id="toast" class="toast" aria-live="polite"></div>
+    <div id="haulMessage" class="haul-message" aria-hidden="true"></div>
+    <div class="depth-label"><span class="depth-line"></span><span id="zoneLabel">연안 수역</span></div>
+    <div class="control-hint"><span class="mouse-icon">↧</span><span id="controlHint">원하는 위치를 누르고 있으면 하강 · 놓으면 인양</span></div>
+    <div class="legend"><span class="legend-gold">◆</span> 보물 &nbsp; <span class="legend-red">✖</span> 위험물</div>
+    <div id="modal" class="modal" aria-live="polite"><div id="modalContent" class="modal-inner"></div></div>
+  </main>
+  <footer class="upgradebar">
+    <div class="bar-heading"><span>LIVE UPGRADES</span><small>인양 수익으로 즉시 강화</small></div>
+    <button class="upgrade-btn" data-upgrade="speed"><span class="upgrade-ic">⚙</span><span class="upgrade-body"><b>모터 강화 <i id="speedLv">Lv.0</i></b><small>하강·인양 속도</small></span><strong id="speedCost">85</strong></button>
+    <button class="upgrade-btn" data-upgrade="capacity"><span class="upgrade-ic">▣</span><span class="upgrade-body"><b>화물 용량 <i id="capacityLv">Lv.0</i></b><small>더 많은 보물 수집</small></span><strong id="capacityCost">115</strong></button>
+    <button class="upgrade-btn" data-upgrade="luck"><span class="upgrade-ic">✦</span><span class="upgrade-body"><b>탐지 장치 <i id="luckLv">Lv.0</i></b><small>고가 보물 발견</small></span><strong id="luckCost">140</strong></button>
+  </footer>
+</div>
+<script src="game.js?v=1"></script>
+</body>
+</html>
